@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Família Forte PPV</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#0c121c; --card:#1a2332; --card2:#141c29; --gold:#d2bc8f; --gold-h:#e6d0a3; --txt:#ffffff;
+    --muted:#9aa4b5; --line:rgba(210,188,143,.25);
+    --f1:#3b82f6; --f2:#10b981; --f3:#f59e0b; --f4:#8b5cf6; --f5:#ef4444; --f6:#ec4899;
+    --ok:#10b981; --warn:#f59e0b; --bad:#ef4444;
+    --display:"Playfair Display",Georgia,serif; --body:"Montserrat","Segoe UI",system-ui,sans-serif;
+  }
+  html{color-scheme:dark}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--body);font-size:14px;line-height:1.55;padding-block:0 48px}
+  *{box-sizing:border-box}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+  header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(12,18,28,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px;flex-wrap:wrap}
+  .brand{display:flex;flex-direction:column}
+  .brand b{font-family:var(--display);font-size:22px;color:var(--gold);font-weight:600}
+  .brand small{color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;font-size:10.5px}
+  .count{display:flex;gap:10px;align-items:center}
+  .count .n{font-family:var(--display);font-size:30px;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1}
+  .count .l{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;line-height:1.2}
+  .ig{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--gold);color:var(--gold);border-radius:999px;padding:6px 14px;font-weight:600;font-size:12.5px;text-decoration:none}
+  .ig:hover{background:var(--gold);color:var(--bg)}
+  .ig svg{width:16px;height:16px}
+  nav.tabs{display:flex;gap:6px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+  nav.tabs::-webkit-scrollbar{display:none}
+  nav.tabs button{background:transparent;border:1px solid transparent;color:var(--muted);padding:7px 14px;border-radius:999px;font:600 12.5px var(--body);cursor:pointer;white-space:nowrap}
+  nav.tabs button:hover{color:var(--txt)}
+  nav.tabs button[aria-selected=true]{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+  button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--gold-h);outline-offset:2px}
+  section.view{padding-block:24px 0}
+  h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;margin:0}
+  h2{font-size:26px;color:var(--gold)}
+  h3{font-size:18px;color:var(--gold)}
+  p{margin:0}
+  .lead{color:var(--muted);max-width:70ch;margin-top:6px}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  .card{background:var(--card);border:2px solid var(--gold);border-radius:12px;padding:18px;position:relative}
+  .card.soft{border:1px solid var(--line)}
+  .card.flat{border-color:transparent;background:var(--card2)}
+  .kpi .v{font-family:var(--display);font-size:34px;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1.05}
+  .kpi .k{font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-top:6px}
+  .eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);font-weight:600}
+  .mt{margin-top:22px}.mt2{margin-top:36px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid var(--line);color:var(--txt)}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+  .bar{height:8px;background:var(--card2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .bar i{display:block;height:100%;background:var(--gold);border-radius:99px;transition:width .3s}
+  .tl{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}
+  .tl .ph{background:var(--card2);border-top:4px solid var(--c);border-radius:8px;padding:12px;min-height:130px;display:flex;flex-direction:column;gap:4px}
+  .tl .ph.now{outline:2px solid var(--gold);outline-offset:2px}
+  .tl .ph b{font-family:var(--display);font-size:16px;color:var(--txt)}
+  .tl .ph .d{font-size:12px;color:var(--gold);font-variant-numeric:tabular-nums}
+  .tl .ph p{font-size:12.5px;color:var(--muted)}
+  .tl .ph .pg{margin-top:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  @media (max-width:820px){.tl{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:480px){.tl{grid-template-columns:1fr}}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .filters button,.sbtn{background:var(--card2);border:1px solid var(--line);color:var(--muted);padding:5px 12px;border-radius:999px;font:600 12px var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .filters button[aria-pressed=true]{color:var(--txt);border-color:var(--gold);background:var(--card)}
+  .sbtn:hover{color:var(--txt);border-color:var(--gold)}
+  .day{margin-top:18px;border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
+  .day.today{border:2px solid var(--gold)}
+  .day header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card2);flex-wrap:wrap}
+  .day header b{font-family:var(--display);font-size:17px;color:var(--gold);min-width:150px}
+  .day header .ph-tag{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.06);color:var(--muted)}
+  .day header .mark{font-size:12.5px;color:var(--txt)}
+  .day header .pg{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .task{display:grid;grid-template-columns:22px 4px 1fr auto;gap:12px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.05);align-items:start}
+  .task input[type=checkbox]{width:20px;height:20px;accent-color:var(--gold);margin-top:2px;cursor:pointer}
+  .task .stripe{width:4px;border-radius:2px;background:var(--c);align-self:stretch;min-height:22px}
+  .task .t{font-weight:600}
+  .task.done .t{color:var(--muted);text-decoration:line-through}
+  .task .s{color:var(--muted);font-size:13px;margin-top:2px}
+  .task .who{font-size:10.5px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+  .task .rule{font-size:12px;color:var(--gold-h);margin-top:4px;padding-left:10px;border-left:2px solid var(--line)}
+  .task .note{font-size:12.5px;color:var(--txt);margin-top:6px;background:rgba(210,188,143,.08);border-radius:6px;padding:6px 10px}
+  .task .note b{color:var(--gold)}
+  .ed{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:3px 8px;font:600 11px var(--body);cursor:pointer;white-space:nowrap}
+  .ed:hover{color:var(--gold);border-color:var(--gold)}
+  .card .ed.corner{position:absolute;top:10px;right:10px}
+  .addrow{padding:8px 16px;border-top:1px solid rgba(255,255,255,.05)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  th{font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);text-align:left;padding:10px 12px;background:var(--card2);white-space:nowrap}
+  td{padding:10px 12px;border-top:1px solid rgba(255,255,255,.05);vertical-align:top}
+  td.n{color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap}
+  td b{color:var(--txt)}
+  td .s,li .s{color:var(--muted);font-size:12.5px}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.07);color:var(--txt);white-space:nowrap}
+  ul.plain{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px}
+  ul.plain li{padding-left:16px;position:relative}
+  ul.plain li::before{content:"";position:absolute;left:0;top:9px;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+  ul.plain li .s{display:block}
+  .quote{font-family:var(--display);font-size:19px;color:var(--gold);line-height:1.35;border-left:3px solid var(--gold);padding-left:14px}
+  .obj{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;padding:8px 0;border-top:1px solid rgba(255,255,255,.06)}
+  .obj .q{color:var(--bad);font-weight:600}
+  @media (max-width:600px){.obj{grid-template-columns:1fr}}
+  .dayplan{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:14px}
+  .block{display:grid;grid-template-columns:minmax(96px,max-content) 1fr;gap:6px 14px;padding:10px 0;border-top:1px solid rgba(255,255,255,.06)}
+  .block .h{white-space:nowrap}
+  @media (max-width:520px){.block{grid-template-columns:1fr}.block .h{white-space:normal}}
+  .block .h{color:var(--gold);font-variant-numeric:tabular-nums;font-weight:600}
+  .funil{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+  @media (max-width:820px){.funil{grid-template-columns:1fr}}
+  .funil .card{border-top:6px solid var(--c)}
+  .funil .card h3{color:var(--txt);font-size:20px}
+  .funil .card .sub{color:var(--c);font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700}
+  .field{display:grid;gap:4px}
+  .field label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600}
+  .field input,.field textarea,.field select{background:#fff;color:var(--bg);border:2px solid var(--gold);border-radius:8px;padding:9px 12px;font:500 14px var(--body);width:100%}
+  .field input::placeholder,.field textarea::placeholder{color:#6b7280}
+  .btn{background:var(--gold);color:var(--bg);border:0;border-radius:8px;padding:10px 18px;font:700 13.5px var(--body);cursor:pointer}
+  .btn:hover{background:var(--gold-h)}
+  .btn.ghost{background:#4b5563;color:#fff}
+  .btn.danger{background:var(--bad);color:#fff}
+  .status{font-size:12px;color:var(--muted)}
+  .sync{font-size:11px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+  .sync .dot{background:var(--warn)}
+  .sync.on .dot{background:var(--ok)}
+  .me{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+  .me input{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:4px 8px;font:600 12px var(--body);width:110px}
+  .toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--gold);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;font-size:13px;z-index:60}
+  /* modal */
+  .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+  .md{background:var(--card);border:2px solid var(--gold);border-radius:14px;width:min(720px,100%);max-height:92vh;overflow:auto;padding:20px;display:grid;gap:12px}
+  .md h3{font-size:20px}
+  .md .hint{font-size:12px;color:var(--muted)}
+  .md textarea{min-height:200px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.5}
+  /* log */
+  .log{display:grid;gap:0;margin-top:12px;border-left:2px solid var(--line);padding-left:16px}
+  .log .it{position:relative;padding:10px 0 14px}
+  .log .it::before{content:"";position:absolute;left:-22px;top:16px;width:10px;height:10px;border-radius:50%;background:var(--c,var(--gold));border:2px solid var(--bg)}
+  .log .when{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-variant-numeric:tabular-nums}
+  .log .tt{font-weight:600;margin-top:2px}
+  .log .nt{color:var(--txt);margin-top:4px;font-size:13.5px}
+  .log .nt.empty{color:var(--muted);font-style:italic}
+  .task .t,.task .s,.task .rule,.task .note,td,li,.log .nt,.tl .ph p,.quote,.card p{overflow-wrap:anywhere}
+  @media (max-width:640px){
+    body{font-size:13.5px}
+    header.top{position:static}
+    .top .wrap{gap:10px}
+    .brand b{font-size:19px}
+    .brand small{font-size:9.5px;letter-spacing:.8px}
+    .count .n{font-size:24px}
+    .ig{padding:5px 10px;font-size:11.5px}
+    .me input{width:90px}
+    h2{font-size:22px}
+    .card{padding:14px}
+    .day header b{min-width:0}
+    .day header .pg{margin-left:0}
+    .task{grid-template-columns:22px 4px 1fr auto;gap:8px;padding:10px 12px}
+    .task .who{letter-spacing:.6px}
+    .card .ed.corner{top:8px;right:8px}
+    .md{padding:14px;max-height:94vh}
+    .kpi .v{font-size:28px}
+    .tl .ph{min-height:0}
+    .quote{font-size:16px}
+    .funil .card h3{font-size:18px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <b id="brandName">Família Forte — O Começo</b>
+      <small>Painel de orquestração · Dra. Paula Campozandória · imersão online paga · 07 e 08/11</small>
+    </div>
+    <div class="row">
+      <a class="ig" href="https://www.instagram.com/paulacampozandoria/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>@paulacampozandoria</a>
+      <span class="me">Você: <input id="meName" placeholder="seu nome"></span>
+      <span class="sync" id="sync"><i class="dot"></i><span id="syncTxt">Sincronizando…</span></span>
+      <div class="count"><span class="n" id="cd">—</span><span class="l">dias até<br>07/11</span></div>
+    </div>
+  </div>
+  <div class="wrap"><nav class="tabs" role="tablist" id="tabs"></nav></div>
+</header>
+
+<main class="wrap">
+  <section class="view" id="v-visao" role="tabpanel"></section>
+  <section class="view" id="v-cronograma" role="tabpanel" hidden></section>
+  <section class="view" id="v-funil" role="tabpanel" hidden></section>
+  <section class="view" id="v-reguas" role="tabpanel" hidden></section>
+  <section class="view" id="v-trafego" role="tabpanel" hidden></section>
+  <section class="view" id="v-imersao" role="tabpanel" hidden></section>
+  <section class="view" id="v-narrativa" role="tabpanel" hidden></section>
+  <section class="view" id="v-decisoes" role="tabpanel" hidden></section>
+</main>
+<div id="modal"></div>
+
+<script>
+/* ============ CONSTANTES ============ */
+const EVENT=new Date(2026,10,7);
+const FRONTS={
+  cont:{n:"Conteúdo & Lives",c:"var(--f1)",who:"Paula + conteúdo"},
+  traf:{n:"Tráfego",c:"var(--f2)",who:"Time de tráfego"},
+  copy:{n:"Copy & E-mail",c:"var(--f3)",who:"Copy"},
+  wa:{n:"WhatsApp API",c:"var(--f4)",who:"Operação / API"},
+  tech:{n:"Páginas & Ferramentas",c:"var(--f5)",who:"Gestão / técnico"},
+  ev:{n:"Evento & Oferta",c:"var(--f6)",who:"Paula + Jez + gestão"}
+};
+const PHASES=[
+  {id:"prep",n:"Preparação",d:"28/09 → 04/10",from:"2026-09-28",to:"2026-10-04",c:"var(--f5)",goal:"Semana 28/09 → 04/10: páginas, checkout do ingresso, API oficial aprovada, criativos e programação — tudo pronto antes da captação abrir em 05/10."},
+  {id:"ato1",n:"Ato 1 — O espelho",d:"05/10 → 14/10",from:"2026-10-05",to:"2026-10-14",c:"var(--f1)",goal:"Reconhecimento: “Ela está falando da minha casa.” Lote 1 do ingresso aberto (R$ 27,90)."},
+  {id:"ato2",n:"Ato 2 — A descoberta",d:"15/10 → 25/10",from:"2026-10-15",to:"2026-10-25",c:"var(--f3)",goal:"Quebra de crença: “Talvez eu esteja resolvendo do jeito errado.” Virada para o Lote 2."},
+  {id:"ato3",n:"Ato 3 — O futuro possível",d:"26/10 → 06/11",from:"2026-10-26",to:"2026-11-06",c:"var(--f2)",goal:"Esperança concreta: provas, antes/depois. Convite intensifica. Lote 3 e última chamada."},
+  {id:"ato4",n:"Ato 4 — Imersão + Oferta",d:"07/11 → 13/11",from:"2026-11-07",to:"2026-11-13",c:"var(--f6)",goal:"Dois dias que organizam tudo → Família Forte 2.0 vitalício (Black Friday antecipada) → fechamento e debrief."}
+];
+const DOW=["dom","seg","ter","qua","qui","sex","sáb"];
+const pad=n=>String(n).padStart(2,"0");
+const K=(m,d)=>`2026-${pad(m)}-${pad(d)}`;
+const kd=k=>{const [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)};
+const fmtK=k=>`${k.slice(8,10)}/${k.slice(5,7)}`;
+const addDays=(k,n)=>{const d=kd(k);d.setDate(d.getDate()+n);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+
+/* ============ CONTEÚDO PADRÃO (tudo editável) ============ */
+const CONTENT_V=5;
+function defaultContent(){
+  const tasks=[];let n=0;
+  const add=(k,f,t,s,r)=>tasks.push({id:"t"+(n++),k,f,t,s:s||"",r:r||""});
+  /* PREPARAÇÃO */
+  add(K(9,28),"ev","Bater o nome definitivo da imersão","Provisório: Família Forte — O Começo. Validar junto à promessa e à identidade visual antes de gravar qualquer peça.","Nome simples, humano, familiar, ligado à ideia de construção. Nada digital/técnico.");
+  add(K(9,28),"ev","Definir os 3 lotes do ingresso","Lote 1 = R$ 27,90. Preço e data de virada dos lotes 2 e 3 — registrar em Decisões.","Sugestão: virar lote junto com a virada de ato (15/10 e 26/10).");
+  add(K(9,28),"cont","Mapear o funil de conteúdo da Paula (topo → meio → fundo)","Ela já produz vídeos virais: definir quais formatos são topo (viral/descoberta), meio (lives, cortes, e-mail, WhatsApp) e fundo (página, remarketing, oferta). Registrar na aba Funil.","Cada peça precisa responder: em qual ato estamos e qual conclusão a mãe precisa ter.");
+  add(K(9,28),"tech","Preencher Raio X + Nicho, Avatar e Roma","Avatar: mãe cristã, casada, 30–45, filhos de 2 a 10, trabalha fora. Roma DSA: 'uma família com direção'.","Rotina da planilha antecipada para a semana 0.");
+  add(K(9,29),"ev","Fechar a oferta do ingresso","Nome, o que os 2 dias entregam, bônus de quem compra no Lote 1, garantia. Preencher Oferta — Visão Geral.","A imersão não é 'curso de birra' nem palestra longa.");
+  add(K(9,29),"ev","Fechar a oferta do Família Forte 2.0","Preço vitalício da Black Friday antecipada, entregáveis, bônus, garantia, prazo do carrinho.","A narrativa não pode depender do desconto.");
+  add(K(9,29),"tech","Criar página de vendas do ingresso + checkout","Copy na linguagem da mãe (zero técnica). Preço do lote atual visível, próximo lote anunciado.","Aqui a conversão é COMPRA, não lead.");
+  add(K(9,29),"tech","Criar página de obrigado da compra","'Você vai receber uma mensagem no WhatsApp agora' + botão salvar contato. Sem link de grupo.","");
+  add(K(9,30),"wa","Conta WhatsApp Business API oficial pronta","Número dedicado, verificação Meta, nome 'Família Forte', foto e descrição. Escolher provedor (BSP).","Sem grupos e sem Joinzap: mensagens 1:1 pela API.");
+  add(K(9,30),"wa","Enviar templates de aquecimento para aprovação da Meta","Boas-vindas + pesquisa, faltam 7/4/1 dias, instruções, nutrição por ato.","Aprovação leva de horas a 48h; aprovados até 03/10. Template reprovado = disparo bloqueado.");
+  add(K(9,30),"wa","Integrar checkout → disparo automático","Webhook 'compra aprovada' dispara boas-vindas na hora. Testar com compra real e estornar.","");
+  add(K(9,30),"tech","Pixel + evento de compra nas páginas","Pixel Meta em todas as páginas; Purchase na página de obrigado; domínio verificado; tag do Google.","");
+  add(K(10,1),"copy","Sequência de e-mail pós-compra","1) Obrigado + pesquisa (imediato) · 2) Salve o número da Paula (D+1) · 3) Guarde a data (D+3).","Substitui o e-mail 'Grupo de WhatsApp'.");
+  add(K(10,1),"copy","Pesquisa de avatar","Idade dos filhos, maior incêndio do dia, o que já tentou, o marido concorda?","");
+  add(K(10,1),"traf","Mapa de criativos: 10 criativos de VENDA DE INGRESSO","Chamada para evento pago: 'dois dias para parar de resolver cada problema separado'. Aproveitar os virais da Paula que mais performaram como base.","Nada de culpabilizar a mãe ou vilanizar a criança.");
+  add(K(10,2),"traf","Planejamento de investimento","Meta de ingressos, CPA-alvo por lote, orçamento diário. Planilha de Tráfego + Lançamento — Visão Geral.","Campanha de CONVERSÃO otimizada para Purchase.");
+  add(K(10,2),"traf","Montar campanhas de captação (compra) para 05/10","Públicos: interesses do avatar, Envolvimento 60D, VV 25%/95% dos virais, Lookalike 1%, remarketing da página. 5 anúncios iniciais.","Criar 2 dias antes: aprovação leva até 48h.");
+  add(K(10,2),"traf","Remarketing de carrinho abandonado do ingresso","Visitou checkout e não comprou. Roda até 06/11.","");
+  add(K(10,3),"cont","Programar as lives do Ato 1","Definir dias, horários e temas (as 6 perguntas-espelho do documento). Registrar na aba Funil → Programação de lives.","");
+  add(K(10,3),"cont","Planejar os vídeos virais do Ato 1 (topo)","Temas de reconhecimento no formato que já funciona para ela. Cada viral termina apontando para a imersão.","");
+  add(K(10,4),"tech","Checklist final de virada","Teste ponta a ponta: anúncio → página → checkout → obrigado → WhatsApp em <1 min → e-mail.","Se qualquer elo falhar, a captação NÃO abre dia 05/10.");
+  /* ROTINAS SEMANAIS */
+  const weeks=[[K(10,5),"ato1"],[K(10,12),"ato2"],[K(10,19),"ato2"],[K(10,26),"ato3"],[K(11,2),"ato3"]];
+  const ACT={ato1:"Ato 1 · reconhecimento: dar nome ao que a mãe vive. Não entregar a solução completa.",ato2:"Ato 2 · mudar a interpretação: amor e limite não são opostos; autoridade ≠ grito; info solta ≠ direção.",ato3:"Ato 3 · possibilidade: histórias reais, antes/depois, demonstrações. 'Isso cabe na minha vida.'"};
+  weeks.forEach(([mon,ph],i)=>{
+    const mix=mon==="2026-10-12"?" (segunda a quarta ainda Ato 1; virada para o Ato 2 na quinta 15/10)":"";
+    add(mon,"cont","Vídeos virais da semana (topo de funil)",ACT[ph]+mix+" Produzir/publicar os virais da semana alinhados ao ato; CTA para a imersão.","Topo: descoberta e identificação.");
+    add(mon,"cont","Cortes das lives e conteúdo de meio de funil","Cortes da live anterior, carrosséis/stories com a cena da semana; CTA para a página do ingresso.","Meio: aprofundar consciência.");
+    if(i>0)add(mon,"traf","Distribuição paga do conteúdo da semana anterior (segunda)","Campanha de visualização de vídeo com os virais e cortes da semana passada. Duplicar, trocar vídeos, ajustar data.","");
+    add(mon,"traf","Otimizar orçamento da captação (seg a qui)","Novo orçamento diário = compras de ontem × CPA ideal. Registrar no Planilhamento.","");
+    add(addDays(mon,2),"traf","Otimizar criativos (segunda e quarta)","Pausar anúncios com CPA acima do alvo; subir novos na mesma quantidade.","");
+    add(addDays(mon,3),"traf","Otimizar públicos (quinta)","Pausar públicos acima do CPA-alvo; adicionar novos.","");
+    add(addDays(mon,1),"cont","Live 1 da semana (ver Programação de lives)",ph==="ato1"?"Cena real da casa: tablet, ordem repetida, culpa, casal discorda, apagar incêndio.":ph==="ato2"?"Padrões: 'não é falta de amor'; por que dica solta não vira rotina.":"Prova e demonstração prática; convite direto para a imersão.","Mín. 30 min. Postar o link como evidência.");
+    add(addDays(mon,3),"cont","Live 2 da semana (ver Programação de lives)","","Mín. 30 min.");
+    add(addDays(mon,1),"wa","Mensagem semanal de nutrição para compradoras (API)","Template aprovado. Uma cena + uma pergunta + lembrete leve da data.","WhatsApp aproxima, lembra e conduz.");
+    add(addDays(mon,3),"copy","E-mail semanal da narrativa","Desenvolve o raciocínio do ato. Segmentar compradoras × não compradoras (convite + lote atual).","");
+    add(addDays(mon,4),"ev","Reunião de ato (sexta): coerência dos canais e vendas × meta","Instagram, lives, e-mail e WhatsApp contam o MESMO filme? Ajustes para a próxima semana.","Se a peça não responde 'qual conclusão a mãe precisa ter', ela não entra.");
+  });
+  /* MARCOS */
+  add(K(10,5),"traf","Ativar captação (venda de ingresso) — Lote 1","Campanhas ativas, pixel disparando Purchase, orçamento conforme planejamento.","CAPTAÇÃO DEVE COMEÇAR HOJE.");
+  add(K(10,5),"wa","Confirmar templates aprovados e disparo automático funcionando","Primeira compra do dia = primeira boas-vindas. Monitorar entrega/leitura.","");
+  add(K(10,12),"ev","Coletar provas sociais para o Ato 3","Depoimentos de alunas do FF 1.0, prints, antes/depois de rotina. Pedir autorização.","");
+  add(K(10,12),"ev","Comunicar virada de lote (faltam 3 dias)","Stories, e-mail e WhatsApp (não compradoras).","");
+  add(K(10,14),"ev","Último dia do Lote 1","Disparo 'últimas horas' + story de contagem.","");
+  add(K(10,15),"tech","Virar checkout para o Lote 2","Atualizar preço na página, checkout e criativos. Testar compra.","");
+  add(K(10,15),"traf","Trocar criativos para o Ato 2","5 novos anúncios com a mensagem de quebra de crença + preço do Lote 2.","");
+  add(K(10,19),"ev","Roteiro da Imersão — Dia 1","Reconhecer → entender → descobrir. Arquétipo Jeito Errado / Jeito Certo.","");
+  add(K(10,20),"ev","Roteiro da Imersão — Dia 2","Aplicar → método e continuidade → oferta do FF 2.0 como consequência lógica.","");
+  add(K(10,21),"ev","Roteiro da oferta (pitch) do FF 2.0","Transformação, entregáveis, bônus, garantia, condição vitalícia, prazo. Desmontar as 7 objeções antes do preço.","");
+  add(K(10,22),"copy","E-mails de lançamento do FF 2.0 (8 peças)","Inscrições abertas (3 no dia 1), Estamos vivos, Atendendo a pedidos, Encerramento, Encerram hoje, Últimas horas.","");
+  add(K(10,23),"wa","Enviar templates de EVENTO e OFERTA para aprovação","Começa em 1h · ao vivo · replay · oferta aberta · vagas/bônus · encerra hoje · últimas horas · boleto · recusada.","Aprovados até 30/10.");
+  add(K(10,23),"ev","Comunicar virada para o Lote 3 (faltam 3 dias)","","");
+  add(K(10,25),"ev","Último dia do Lote 2","","");
+  add(K(10,26),"tech","Virar checkout para o Lote 3","","");
+  add(K(10,26),"traf","Trocar criativos para o Ato 3","Provas, depoimentos, 'faltam 12 dias'.","");
+  add(K(10,27),"tech","Página de vendas + checkout do Família Forte 2.0","Oferta vitalícia. Página escondida até 08/11. Evento Purchase separado.","");
+  add(K(10,28),"copy","E-mails e mensagens de recuperação de vendas","Carrinho abandonado #1/#2, compra cancelada, boleto #1/#2. Programar automação.","");
+  add(K(10,29),"traf","Criativos de remarketing (7 lembrete · 4 ao vivo · 7 carrinho aberto)","","");
+  add(K(10,30),"wa","Confirmar aprovação de todos os templates do evento","Ter mensagem alternativa pronta.","");
+  add(K(10,30),"traf","Montar remarketing 'Faltam X dias' e 'Estamos ao vivo'","Alcance para compradoras + tráfego para não compradoras (última chamada).","");
+  add(K(10,31),"copy","E-mail 'Faltam 7 dias'","Compradoras: agenda. Não compradoras: Lote 3 + escassez real.","");
+  add(K(10,31),"wa","WhatsApp 'Faltam 7 dias'","","");
+  add(K(11,2),"ev","Definir plataforma e fluxo de acesso do evento","Onde a mãe assiste, link único por compradora?, replay, suporte ao vivo.","");
+  add(K(11,3),"copy","E-mail 'Faltam 4 dias'","","");
+  add(K(11,3),"wa","WhatsApp 'Faltam 4 dias'","","");
+  add(K(11,4),"traf","Montar remarketing de carrinho do FF 2.0 (para 08/11)","Viu a imersão, visitou página de vendas, compradoras do ingresso, lista total.","");
+  add(K(11,5),"ev","Ensaio técnico da transmissão","Áudio, luz, slides, link, chat, plano B. Simular a virada para a oferta.","");
+  add(K(11,5),"ev","Reunião de guerra: papéis dos 2 dias","Quem apresenta, modera chat, responde WhatsApp, monitora checkout, posta stories.","");
+  add(K(11,6),"copy","E-mail 'É amanhã' + instruções de acesso","","");
+  add(K(11,6),"wa","WhatsApp 'É amanhã' + instruções","Duas chamadas: manhã e noite.","");
+  add(K(11,6),"traf","Última chamada de ingresso (encerra hoje)","Pausar captação à meia-noite. Manter lembrete ativo.","");
+  add(K(11,6),"tech","Fechar vendas do ingresso e travar checkout","","");
+  add(K(11,7),"wa","WhatsApp 'Começa em 1h'","","");
+  add(K(11,7),"ev","IMERSÃO — Dia 1 ao vivo","Reconhecer → entender → descobrir. Gancho para o Dia 2.","Não é palestra longa.");
+  add(K(11,7),"wa","WhatsApp 'Estamos ao vivo' + 'Replay do Dia 1'","","");
+  add(K(11,7),"copy","E-mail 'Como foi o Dia 1 + amanhã tem mais'","","");
+  add(K(11,7),"traf","Remarketing 'Estamos ao vivo' ativo","","");
+  add(K(11,8),"wa","WhatsApp 'Começa em 1h' (Dia 2)","","");
+  add(K(11,8),"ev","IMERSÃO — Dia 2 ao vivo + abertura da oferta","Aplicar → método → Família Forte 2.0 vitalício abre AO VIVO.","Bônus de quem decide ao vivo.");
+  add(K(11,8),"tech","Publicar página de vendas + liberar checkout do FF 2.0 no pitch","","");
+  add(K(11,8),"wa","WhatsApp 'Oferta aberta' (2 chamadas) + 'Vagas com bônus e garantia'","","");
+  add(K(11,8),"copy","E-mails Dia 1 do carrinho: Inscrições abertas · Cuidado, pode perder sua vaga · Últimas horas do bônus","","");
+  add(K(11,8),"traf","Ativar remarketing de carrinho do FF 2.0","","");
+  [[9,"Estamos vivos… (Dia 2 #1)"],[10,"Atendendo a pedidos (Dia 3 #1)"],[11,"Encerramento das inscrições (Dia 4 #1)"],[12,"As matrículas encerram hoje (#1) + Últimas horas (#2)"]].forEach(([d,t])=>{add(K(11,d),"copy","E-mail: "+t,"","");add(K(11,d),"wa","WhatsApp: "+t,"","");});
+  for(let d=9;d<=12;d++){add(K(11,d),"traf","Otimizar remarketing de carrinho (diário)","Priorizar os públicos mais quentes (assistiu o Dia 2).","");add(K(11,d),"wa","Recuperação manual: boleto emitido + compra recusada","Preencher Planilha de Recuperação com status.","");add(K(11,d),"ev","Monitorar vendas × meta e responder objeções","","");}
+  add(K(11,9),"cont","Virais e cortes com os melhores momentos da imersão","","");
+  add(K(11,12),"tech","Fechar carrinho à meia-noite","Trocar página por lista de espera.","");
+  add(K(11,13),"ev","Debriefão do lançamento","Números por lote, CPA, conversão ingresso→FF 2.0, o que cada canal entregou.","");
+  add(K(11,13),"wa","Exportar histórico da API e manter base segmentada","Compradoras × alunas FF 2.0 × não compradoras.","");
+  add(K(11,13),"traf","Pausar campanhas e arquivar relatórios","","");
+
+  const lives=[];
+  const temas={ato1:["Você tira o tablet e seu filho vira outra criança?","Quantas vezes você precisa pedir a mesma coisa?","Você promete mais paciência e termina o dia culpada?","Seu marido corrige de um jeito e você de outro?"],ato2:["Nem todo comportamento é 'fase'","Amor e limite não são opostos","Autoridade não é grito; rotina não é quartel","Resolver a birra sem olhar o todo só desloca o problema"],ato3:["Caso real: a rotina que mudou em 3 semanas","Antes e depois: a casa no modo sobrevivência","Demonstração: o que muda em dois dias","Última live: o que você vai sair sabendo na imersão"]};
+  const used={ato1:0,ato2:0,ato3:0};
+  weeks.forEach(([mon])=>{[1,3].forEach(off=>{const d=addDays(mon,off);const ph=(PHASES.find(p=>d>=p.from&&d<=p.to)||{}).id;if(!temas[ph])return;const tema=temas[ph][used[ph]%temas[ph].length];used[ph]++;lives.push({d,h:"20h",tema,ato:ph,cta:"Ingresso da imersão — lote atual"});});});
+
+  tasks.forEach(t=>{if(t.k<"2026-09-28")t.k="2026-09-28";});
+  return {
+    v:CONTENT_V,
+    marks:{[K(9,28)]:"Início da preparação",[K(10,5)]:"Abre a narrativa · Lote 1 (R$ 27,90) · captação começa",[K(10,15)]:"Virada para o Ato 2 · Lote 2",[K(10,26)]:"Virada para o Ato 3 · Lote 3",[K(10,31)]:"Faltam 7 dias",[K(11,3)]:"Faltam 4 dias",[K(11,6)]:"É amanhã · instruções de acesso",[K(11,7)]:"IMERSÃO — Dia 1",[K(11,8)]:"IMERSÃO — Dia 2 · oferta FF 2.0 abre ao vivo",[K(11,12)]:"Carrinho FF 2.0 fecha (proposta)",[K(11,13)]:"Fechamento e debrief"},
+    tasks,lives,
+    funil:{
+      topo:[["Vídeos virais (Reels/TikTok/Shorts)","Cenas de reconhecimento na linguagem da casa; formato que a Paula já domina","Descoberta e identificação · alimentar públicos de VV 25%/95%","Alcance, views, seguidores, custo por view na distribuição"],["Distribuição paga dos virais","Campanha de visualização toda segunda com os virais da semana anterior","Aquecer público frio barato","CPV, % de retenção"],["Criativos de venda do ingresso (público frio)","Virais que mais performaram + CTA 'dois dias'","Primeira compra de R$ 27,90","CPA por lote"]],
+      meio:[["Lives (2 por semana)","Aprofundam consciência e autoridade; tema segue o ato","Levar de 'reconheço' para 'talvez eu esteja resolvendo errado'","Espectadores, tempo médio, comentários"],["Cortes das lives + carrosséis + stories","Meio de funil orgânico com CTA para a página do ingresso","Nutrir quem viu o viral e não comprou","Cliques no link, saves"],["E-mail semanal + WhatsApp (API)","E-mail argumenta; WhatsApp aproxima e lembra","Manter a compradora aquecida e converter a não compradora","Abertura, resposta, compras por disparo"],["Remarketing de carrinho do ingresso","Visitou checkout e não comprou","Recuperar compra","CPA do remarketing"]],
+      fundo:[["Página de vendas do ingresso + lotes","Escassez real por lote acompanhando os atos","Compra do ingresso","Conversão da página, compras/dia"],["Provas sociais (Ato 3)","Depoimentos, antes/depois, casos reais","'Isso cabe na minha vida'","Compras no Lote 3"],["Imersão 07 e 08/11","Organiza tudo; Dia 2 abre a oferta ao vivo","Decisão: 'preciso aprender a conduzir agora'","Comparecimento, permanência no pitch"],["Oferta FF 2.0 + remarketing de carrinho + recuperação","Vitalício, BF antecipada, bônus ao vivo, carrinho 08→12/11","Venda do Família Forte 2.0","Conversão ingresso→FF 2.0, faturamento"]]
+    },
+    wa:[["Compra aprovada","imediato","Boas-vindas + pesquisa","Convite para a data + link da pesquisa. Pede para salvar o contato.","utility"],["Compra +1 dia","D+1 · 9h","Guarde a data","Agenda dos dois dias e o que preparar.","utility"],["Terças (semanal, a partir de 06/10)","9h","Nutrição do ato","Uma cena + uma pergunta. Um template por ato.","marketing"],["12/10 · 23/10","10h","Virada de lote (não compradoras com contato)","'Até domingo o ingresso está em R$ X.'","marketing"],["31/10","10h","Faltam 7 dias","Agenda + convite para chamar o marido.","marketing"],["03/11","10h","Faltam 4 dias","O que a mãe vai sair sabendo.","marketing"],["06/11","9h e 19h","É amanhã + instruções","Link, horário, acesso, suporte.","utility"],["07/11","1h antes","Começa em 1h","","utility"],["07/11","na abertura","Estamos ao vivo","Link direto.","utility"],["07/11","noite","Replay do Dia 1 + gancho do Dia 2","","utility"],["08/11","1h antes · abertura","Começa em 1h · Estamos ao vivo","","utility"],["08/11","no pitch · +3h","Oferta aberta (chamada 1 e 2)","Condição vitalícia + bônus de quem decide ao vivo.","marketing"],["08/11","noite","Vagas com bônus e garantia","","marketing"],["09/11","10h","Estamos vivos…","Respostas às dúvidas do chat.","marketing"],["10/11","10h","Atendendo a pedidos","","marketing"],["11/11","10h","Encerramento das inscrições","","marketing"],["12/11","9h · 18h · 22h","As matrículas encerram hoje · Últimas horas","","marketing"],["09→12/11","manual, diário","Recuperação: boleto emitido · compra recusada","1:1 pela API, script da pasta 7.","utility"]],
+    waRules:[["Templates enviados até 30/09 (aquecimento) e 23/10 (evento e oferta); aprovação pode levar 48h.","Guardar um template alternativo genérico para emergências."],["Janela de 24h: quando a mãe responde, a equipe conversa livremente por 24h sem template.","Aproveitar respostas à pesquisa para relacionamento 1:1."],["Nunca mais de 1 mensagem de marketing por dia por contato, exceto Dia 1 do carrinho e último dia.","Número bloqueado = régua inteira parada."],["Segmentar sempre: compradoras × não compradoras com contato × alunas FF 2.0 (parar a régua de venda na compra).",""]],
+    em:[["Compra aprovada","Obrigado + pesquisa de avatar","Sequência automática · passo 1"],["D+1","Salve o número da Paula no WhatsApp","Sequência automática · passo 2"],["D+3","Guarde a data: 07 e 08/11","Sequência automática · passo 3"],["Quintas","E-mail da narrativa (Ato 1 / 2 / 3)","Segmentar compradoras × não compradoras"],["12/10 · 23/10","Virada de lote em 3 dias","Não compradoras"],["14/10 · 25/10 · 06/11","Últimas horas do lote / do ingresso","Não compradoras"],["31/10","Faltam 7 dias",""],["03/11","Faltam 4 dias",""],["06/11","É amanhã + instruções de acesso",""],["07/11","Como foi o Dia 1 + amanhã tem mais","Replay"],["08/11","Inscrições abertas · Cuidado, pode perder sua vaga · Últimas horas do bônus ao vivo","Dia 1 do carrinho — 3 e-mails"],["09/11","Estamos vivos…","Dia 2 #1"],["10/11","Atendendo a pedidos","Dia 3 #1"],["11/11","Encerramento das inscrições","Dia 4 #1"],["12/11","As matrículas encerram hoje · Últimas horas","Dia 5 #1 e #2"],["Automação","Carrinho abandonado #1 e #2 · Compra cancelada · Boleto #1 e #2","Recuperação — ingresso e FF 2.0"]],
+    trafCards:[["1 · Captação (venda de ingresso)","Campanha de conversão → Purchase. 5 anúncios iniciais por ato. Públicos: interesses do avatar, Envolvimento 60D, VV 25%/95% dos virais, Lookalike 1%, remarketing da página.","05/10 → 06/11 · trocar criativos a cada ato"],["2 · Distribuição de conteúdo","Toda segunda: visualização de vídeo com os virais e cortes da semana anterior (Meta e YouTube).","12/10 → 09/11"],["3 · Remarketing de carrinho do ingresso","Visitou checkout e não comprou. Preço do lote atual + próximo lote como escassez.","05/10 → 06/11 · sempre ligado"],["4 · Lembrete (compradoras)","Alcance para compradoras: 'Faltam X dias' e 'Estamos ao vivo'.","31/10 → 08/11"],["5 · Remarketing de carrinho FF 2.0","Tráfego; conjuntos: assistiu o Dia 2, visitou página, compradoras do ingresso, lista total.","08/11 → 12/11 · criar até 04/11"],["6 · Criativos","10 de venda (Ato 1) + 5 por ato · 7 lembrete · 4 ao vivo · 7 carrinho aberto.","Nunca: culpa da mãe, criança vilã, medo extremo"]],
+    trafMeta:["Todo dia · orçamento: compras de ontem × CPA ideal = novo orçamento diário.","Segunda e quarta · criativos: pausar acima do CPA-alvo, subir novos.","Quinta · públicos: pausar acima do CPA-alvo, adicionar novos.","Todo dia · planilhamento de vendas e criativos."],
+    trafGoogle:["Todo dia · orçamento (se gastou tudo dentro do CPA, aumenta) e lance de CPA por grupo.","Quarta · dispositivos, locais, programação; criativos.","Quinta · públicos.","Grupos: View Video, inscritos, envolvimento, interesses, ≥15 palavras-chave, ≥50 canais."],
+    d1:[["Abertura","Fratura emocional: 'Eu amo a minha família, mas a rotina não se parece com a família que eu sonhei construir.' Regra: ninguém sai culpada."],["Bloco 1","RECONHECER — as cenas: tablet, ordem repetida, culpa, casal desalinhado, apagar incêndio. Exercício guiado do cenário da própria casa."],["Bloco 2","ENTENDER — casa no modo sobrevivência × família com direção. Nem tudo é fase; amor e limite não são opostos; autoridade não é grito."],["Bloco 3","DESCOBRIR — os três fundamentos na linguagem da casa, só depois nomeados: organização, autoridade, emocional."],["Fechamento","Tarefa: escolher UMA decisão pequena de hoje. Gancho para o Dia 2."]],
+    d2:[["Abertura","Retomar as decisões do chat. Prova: histórias reais de alunas."],["Bloco 1","APLICAR — demonstração em 3 situações (birra 2–4, desobediência 5–10, casal discordando)."],["Bloco 2","MÉTODO — transformação consistente exige método e continuidade. Desmontar as 7 objeções antes do preço."],["Oferta","Família Forte 2.0 como consequência lógica. Vitalício, BF antecipada, bônus de quem decide ao vivo. Checkout liberado na hora."],["Encerramento","Perguntas ao vivo, garantia. WhatsApp 'Oferta aberta' sai com a Paula no ar."]],
+    ingressos:[["Lote 1 · R$ 27,90 · 05/10 → 14/10 (Ato 1)","Bônus de entrada: gravação + material do Dia 1."],["Lote 2 · a definir · 15/10 → 25/10 (Ato 2)",""],["Lote 3 · a definir · 26/10 → 06/11 (Ato 3)",""],["Vendas encerram 06/11 à meia-noite.","Cada virada é comunicada 3 dias antes + 'últimas horas' no dia."]],
+    ofertaFF:[["Abre ao vivo no Dia 2 (08/11) · fecha 12/11 (proposta)",""],["Condição: acesso vitalício, Black Friday antecipada",""],["Não é 'biblioteca de aulas': é a metodologia que organiza o que ela percebeu.","Filhos que aprendem limites, rotina organizada, virtudes, cuidado emocional, casal alinhado."],["Papéis no ar: apresentação (Paula), chat, WhatsApp 1:1, checkout, stories",""]],
+    tensao:["Casa no modo sobrevivência × Família com direção","A mãe não é negligente: ama profundamente e conduz a casa sem caminho claro. O inimigo é a falta de direção, o excesso de informação desconectada e as soluções pontuais."],
+    conclusoes:[["“Isso acontece na minha casa.”","reconhecimento (Ato 1)"],["“Talvez eu esteja tentando resolver do jeito errado.”","quebra de crença (Ato 2)"],["“Existe um caminho mais claro e possível.”","esperança concreta (Ato 3)"],["“Eu preciso aprender a conduzir isso agora.”","decisão (Imersão)"]],
+    linguagem:[["Organização","“Uma casa que funciona.”"],["Autoridade","“Uma mãe que sabe conduzir sem viver gritando ou repetindo.”"],["Emocional","“Uma criança que aprende a lidar com o que sente.”"]],
+    frases:["Uma família forte não acontece por acaso. Ela é construída nas pequenas decisões de todos os dias.","Seu filho não precisa de uma mãe que saiba tudo. Precisa de uma mãe que saiba conduzir.","Talvez você não precise tentar mais. Talvez precise finalmente saber o que fazer, em que ordem e por quê.","Você não precisa resolver cada problema da sua casa separadamente.","Não é sobre ser uma mãe perfeita. É sobre ter direção.","A mudança da sua família começa dentro de casa — e começa nas decisões de hoje."],
+    obj:[["“Já tentei de tudo.”","Não faltou tentativa; faltou visão integrada e sequência de aplicação."],["“Já fiz outros cursos.”","Consumir informação e transformar a rotina são coisas diferentes."],["“É só uma fase.”","Distinguir desenvolvimento esperado de padrões que pedem direção — sem alarmismo."],["“Meu marido acha frescura.”","Conteúdo que inclui o casal e mostra o custo do desalinhamento."],["“Com meu filho não funciona.”","Casos diversos, princípios adaptáveis, sem promessa universal."],["“Não tenho tempo.”","O método cabe na rotina real."],["“Não quero me sentir mais culpada.”","A campanha não acusa: troca culpa por clareza."]],
+    nao:["Não transformar a criança em vilã.","Não construir a campanha sobre medo extremo do futuro dos filhos.","Não prometer filho perfeito, obediência absoluta ou ausência de conflitos.","Não culpabilizar a mãe para vender.","Não abrir com termos técnicos de psicologia.","Não entregar dicas aleatórias sem conexão com a história maior.","Não deixar cada canal parecer uma campanha diferente.","Não depender de desconto para criar desejo."],
+    canais:[["Instagram (virais)","identificação e descoberta"],["Lives","aprofundam consciência e autoridade"],["E-mail","desenvolve o raciocínio"],["WhatsApp (API)","aproxima, lembra e conduz"],["Provas sociais","demonstram possibilidade"],["Imersão","organiza tudo"],["Família Forte 2.0","implementação e continuidade"]]
+  };
+}
+
+/* ============ ESTADO ============ */
+const $=s=>document.querySelector(s);
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+let C=lsGet("ff_content");if(!C||C.v!==CONTENT_V)C=defaultContent();
+let S=lsGet("ff_tasks")||{};      // status: {id:{done,at,who,note}}
+let DEC=lsGet("ff_dec")||{};      // decisões
+let LOG=lsGet("ff_log")||[];      // registros manuais
+let refs={},canWrite=true,migrated=false;
+let me=lsGet("ff_me")||"";
+$("#meName").value=me;$("#meName").onchange=e=>{me=e.target.value.trim();lsSet("ff_me",me);};
+
+const todayKey=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const phaseOfK=k=>PHASES.find(p=>k>=p.from&&k<=p.to);
+const progress=list=>{const n=list.length,d=list.filter(t=>S[t.id]&&S[t.id].done).length;return{n,d,p:n?Math.round(d/n*100):0}};
+const sortedTasks=()=>C.tasks.slice().sort((a,b)=>a.k<b.k?-1:a.k>b.k?1:0);
+
+async function persist(what){
+  if(what==="content")lsSet("ff_content",C);if(what==="tasks")lsSet("ff_tasks",S);if(what==="dec")lsSet("ff_dec",DEC);if(what==="log")lsSet("ff_log",LOG);
+  const ref=refs[what];if(!ref)return;
+  const body=what==="content"?C:what==="tasks"?{tasks:S}:what==="dec"?DEC:{items:LOG};
+  try{await ref.set(body);}catch(e){if(e&&e.code==="invalid_argument"){canWrite=false;setSync(false,"Somente leitura");}else setSync(false,"Salvo só aqui");}
+}
+
+/* ============ MODAL / EDIÇÃO ============ */
+function modal(html,onOpen){$("#modal").innerHTML=`<div class="ov" id="ov"><div class="md" role="dialog" aria-modal="true">${html}</div></div>`;$("#ov").addEventListener("click",e=>{if(e.target.id==="ov")closeModal()});if(onOpen)onOpen();const f=$("#modal").querySelector("input,textarea,select");if(f)f.focus();}
+function closeModal(){$("#modal").innerHTML=""}
+const editBtn=(sec,label)=>canWrite?`<button class="ed corner" data-sec="${sec}" title="Editar seção">✎ ${label||"Editar"}</button>`:"";
+/* editores de seção: lista de linhas "campo | campo | campo" */
+const SEC={
+  lives:{t:"Programação de lives",f:["data (AAAA-MM-DD)","hora","tema","ato (ato1/ato2/ato3)","CTA"],get:()=>C.lives.map(l=>[l.d,l.h,l.tema,l.ato,l.cta]),set:r=>C.lives=r.map(x=>({d:x[0],h:x[1],tema:x[2],ato:x[3],cta:x[4]}))},
+  "funil.topo":{t:"Funil — Topo",f:["canal/formato","o que é","objetivo","métrica"],get:()=>C.funil.topo,set:r=>C.funil.topo=r},
+  "funil.meio":{t:"Funil — Meio",f:["canal/formato","o que é","objetivo","métrica"],get:()=>C.funil.meio,set:r=>C.funil.meio=r},
+  "funil.fundo":{t:"Funil — Fundo",f:["canal/formato","o que é","objetivo","métrica"],get:()=>C.funil.fundo,set:r=>C.funil.fundo=r},
+  wa:{t:"Régua WhatsApp (API)",f:["gatilho/data","hora","mensagem","conteúdo","tipo (utility/marketing)"],get:()=>C.wa,set:r=>C.wa=r},
+  waRules:{t:"Regras da API",f:["regra","observação"],get:()=>C.waRules,set:r=>C.waRules=r},
+  em:{t:"Régua de e-mail",f:["data","e-mail","observação"],get:()=>C.em,set:r=>C.em=r},
+  trafCards:{t:"Campanhas de tráfego",f:["título","descrição","período/observação"],get:()=>C.trafCards,set:r=>C.trafCards=r},
+  trafMeta:{t:"Rotina Meta",f:["item"],get:()=>C.trafMeta.map(x=>[x]),set:r=>C.trafMeta=r.map(x=>x[0])},
+  trafGoogle:{t:"Rotina Google",f:["item"],get:()=>C.trafGoogle.map(x=>[x]),set:r=>C.trafGoogle=r.map(x=>x[0])},
+  d1:{t:"Imersão — Dia 1",f:["bloco","conteúdo"],get:()=>C.d1,set:r=>C.d1=r},
+  d2:{t:"Imersão — Dia 2",f:["bloco","conteúdo"],get:()=>C.d2,set:r=>C.d2=r},
+  ingressos:{t:"Ingresso — lotes",f:["item","detalhe"],get:()=>C.ingressos,set:r=>C.ingressos=r},
+  ofertaFF:{t:"Oferta Família Forte 2.0",f:["item","detalhe"],get:()=>C.ofertaFF,set:r=>C.ofertaFF=r},
+  tensao:{t:"Tensão dramática",f:["frase","explicação"],get:()=>[C.tensao],set:r=>C.tensao=r[0]||["",""]},
+  conclusoes:{t:"As 4 conclusões",f:["frase","etapa"],get:()=>C.conclusoes,set:r=>C.conclusoes=r},
+  linguagem:{t:"Linguagem zero técnica",f:["fundamento","como a mãe fala"],get:()=>C.linguagem,set:r=>C.linguagem=r},
+  frases:{t:"Frases-mãe",f:["frase"],get:()=>C.frases.map(x=>[x]),set:r=>C.frases=r.map(x=>x[0])},
+  obj:{t:"Objeções",f:["objeção","resposta"],get:()=>C.obj,set:r=>C.obj=r},
+  nao:{t:"O que NÃO fazer",f:["item"],get:()=>C.nao.map(x=>[x]),set:r=>C.nao=r.map(x=>x[0])},
+  canais:{t:"Função de cada canal",f:["canal","função"],get:()=>C.canais,set:r=>C.canais=r},
+  marks:{t:"Marcos do calendário",f:["data (AAAA-MM-DD)","marco"],get:()=>Object.entries(C.marks),set:r=>{C.marks={};r.forEach(x=>{if(x[0])C.marks[x[0]]=x[1]})}}
+};
+function openSec(id){
+  const s=SEC[id];const txt=s.get().map(r=>r.map(x=>String(x==null?"":x)).join(" | ")).join("\n");
+  modal(`<h3>${s.t}</h3><p class="hint">Uma linha por item. Campos separados por <b>|</b> na ordem: ${s.f.join(" | ")}. Apague uma linha para remover, adicione linhas para incluir.</p><div class="field"><textarea id="secTxt">${esc(txt)}</textarea></div><div class="row"><button class="btn" id="secSave">Salvar</button><button class="btn ghost" id="secCancel">Cancelar</button><button class="btn ghost" id="secReset" style="margin-left:auto">Restaurar padrão</button></div>`,()=>{
+    $("#secCancel").onclick=closeModal;
+    $("#secReset").onclick=()=>{const d=defaultContent();const tmp=C;C=d;const rows=s.get();C=tmp;s.set(rows);persist("content");closeModal();renderAll();toast("Seção restaurada");};
+    $("#secSave").onclick=()=>{const rows=$("#secTxt").value.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const p=l.split("|").map(x=>x.trim());while(p.length<s.f.length)p.push("");return p});s.set(rows);persist("content");closeModal();renderAll();toast("Salvo para a equipe");};
+  });
+}
+function openTask(id,presetK){
+  const t=id?C.tasks.find(x=>x.id===id):{id:"n"+Date.now(),k:presetK||todayKey(),f:"ev",t:"",s:"",r:""};
+  modal(`<h3>${id?"Editar tarefa":"Nova tarefa"}</h3>
+    <div class="grid g2"><div class="field"><label for="tk">Data</label><input id="tk" type="date" value="${t.k}"></div><div class="field"><label for="tf">Frente</label><select id="tf">${Object.entries(FRONTS).map(([k,f])=>`<option value="${k}" ${t.f===k?"selected":""}>${f.n}</option>`).join("")}</select></div></div>
+    <div class="field"><label for="tt">Tarefa</label><input id="tt" value="${esc(t.t)}"></div>
+    <div class="field"><label for="ts">Detalhe</label><textarea id="ts" style="min-height:70px;font-family:var(--body)">${esc(t.s)}</textarea></div>
+    <div class="field"><label for="tr">Regra / por quê (dourado)</label><input id="tr" value="${esc(t.r)}"></div>
+    <div class="row"><button class="btn" id="tSave">Salvar</button><button class="btn ghost" id="tCancel">Cancelar</button>${id?`<button class="btn danger" id="tDel" style="margin-left:auto">Excluir</button>`:""}</div>`,()=>{
+    $("#tCancel").onclick=closeModal;
+    if(id)$("#tDel").onclick=()=>{if(!confirm("Excluir esta tarefa?"))return;C.tasks=C.tasks.filter(x=>x.id!==id);persist("content");closeModal();renderAll();};
+    $("#tSave").onclick=()=>{const nt={id:t.id,k:$("#tk").value||t.k,f:$("#tf").value,t:$("#tt").value.trim(),s:$("#ts").value.trim(),r:$("#tr").value.trim()};if(!nt.t)return;const i=C.tasks.findIndex(x=>x.id===t.id);if(i>=0)C.tasks[i]=nt;else C.tasks.push(nt);persist("content");closeModal();renderAll();toast("Tarefa salva");};
+  });
+}
+function openDone(id,cb){
+  const t=C.tasks.find(x=>x.id===id);const prev=S[id]||{};
+  modal(`<h3>Concluir: ${esc(t.t)}</h3><p class="hint">Registre o que foi decidido ou feito. Isso entra no Registro de decisões, em sequência, para toda a equipe.</p>
+    <div class="field"><label for="dn">O que foi decidido / feito</label><textarea id="dn" style="min-height:120px;font-family:var(--body)" placeholder="ex.: Lote 2 fechado em R$ 47, vira dia 15/10 às 00h. Checkout já atualizado.">${esc(prev.note||"")}</textarea></div>
+    <div class="field"><label for="dw">Quem</label><input id="dw" value="${esc(prev.who||me)}" placeholder="seu nome"></div>
+    <div class="row"><button class="btn" id="dSave">Concluir e registrar</button><button class="btn ghost" id="dCancel">Cancelar</button></div>`,()=>{
+    $("#dCancel").onclick=()=>{closeModal();if(cb)cb.checked=!!prev.done;};
+    $("#dSave").onclick=()=>{const who=$("#dw").value.trim();if(who&&!me){me=who;lsSet("ff_me",me);$("#meName").value=me;}S[id]={done:true,at:new Date().toISOString(),who,note:$("#dn").value.trim()};persist("tasks");closeModal();renderAll();toast("Registrado");};
+  });
+}
+function openLog(){
+  modal(`<h3>Novo registro</h3><p class="hint">Uma decisão, mudança de rota ou informação que entrou no meio do caminho.</p>
+    <div class="field"><label for="lt">Título</label><input id="lt" placeholder="ex.: Nome definitivo da imersão"></div>
+    <div class="field"><label for="ln">Registro</label><textarea id="ln" style="min-height:120px;font-family:var(--body)"></textarea></div>
+    <div class="field"><label for="lw">Quem</label><input id="lw" value="${esc(me)}"></div>
+    <div class="row"><button class="btn" id="lSave">Salvar</button><button class="btn ghost" id="lCancel">Cancelar</button></div>`,()=>{
+    $("#lCancel").onclick=closeModal;
+    $("#lSave").onclick=()=>{const t=$("#lt").value.trim();if(!t)return;LOG.push({id:"l"+Date.now(),at:new Date().toISOString(),who:$("#lw").value.trim(),t,note:$("#ln").value.trim()});persist("log");closeModal();renderAll();toast("Registrado");};
+  });
+}
+
+/* ============ RENDER ============ */
+const TABS=[["visao","Visão geral"],["cronograma","Cronograma"],["funil","Funil & Lives"],["reguas","Réguas"],["trafego","Tráfego"],["imersao","Imersão & Oferta"],["narrativa","Narrativa"],["decisoes","Decisões & Registro"]];
+let cur=lsGet("ff_tab")||"visao";
+function renderTabs(){$("#tabs").innerHTML=TABS.map(([id,n])=>`<button role="tab" aria-selected="${cur===id}" data-t="${id}">${n}</button>`).join("");$("#tabs").onclick=e=>{const b=e.target.closest("button");if(!b)return;cur=b.dataset.t;lsSet("ff_tab",cur);renderTabs();showTab();};}
+function showTab(){TABS.forEach(([id])=>{$("#v-"+id).hidden=cur!==id});window.scrollTo({top:0});}
+
+function taskRow(t){const f=FRONTS[t.f]||FRONTS.ev,st=S[t.id]||{},done=!!st.done;return `<div class="task ${done?'done':''}" style="--c:${f.c}"><input type="checkbox" data-id="${t.id}" ${done?'checked':''} ${canWrite?'':'disabled'} aria-label="Concluir"><span class="stripe"></span><label for="cb-${t.id}"><span class="t">${esc(t.t)}</span>${t.s?`<div class="s">${esc(t.s)}</div>`:""}<div class="who">${f.n} · ${f.who}${t.k!==todayKey()?' · '+fmtK(t.k):''}</div>${t.r?`<div class="rule">${esc(t.r)}</div>`:""}${done?`<div class="note"><b>${esc(st.who||"—")} · ${st.at?new Date(st.at).toLocaleDateString("pt-BR"):""}:</b> ${st.note?esc(st.note):'<i>sem registro</i>'}</div>`:""}</label>${canWrite?`<button class="ed" data-edit="${t.id}">✎</button>`:""}</div>`}
+
+function feed(){
+  const items=[];
+  C.tasks.forEach(t=>{const st=S[t.id];if(st&&st.done)items.push({at:st.at||"",who:st.who,t:t.t,note:st.note,c:(FRONTS[t.f]||FRONTS.ev).c,k:t.k,kind:"tarefa"})});
+  LOG.forEach(l=>items.push({at:l.at,who:l.who,t:l.t,note:l.note,c:"var(--gold)",kind:"registro",id:l.id}));
+  return items.sort((a,b)=>a.at<b.at?1:-1);
+}
+function feedHtml(list){return list.length?`<div class="log">${list.map(i=>`<div class="it" style="--c:${i.c}"><div class="when">${i.at?new Date(i.at).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}):""} · ${esc(i.who||"—")} · ${i.kind}${i.k?" · tarefa de "+fmtK(i.k):""}</div><div class="tt">${esc(i.t)}</div><div class="nt ${i.note?'':'empty'}">${i.note?esc(i.note):"sem anotação"}</div>${i.id&&canWrite?`<button class="ed" data-dellog="${i.id}" style="margin-top:6px">remover</button>`:""}</div>`).join("")}</div>`:'<p class="status" style="margin-top:8px">Nenhum registro ainda. Ao concluir uma tarefa, escreva o que foi decidido — ele aparece aqui.</p>'}
+
+function renderVisao(){
+  const all=progress(C.tasks),tk=todayKey();
+  const days=Math.ceil((EVENT-new Date(new Date().setHours(0,0,0,0)))/864e5);$("#cd").textContent=days>=0?days:0;
+  const ph=phaseOfK(tk);const late=sortedTasks().filter(t=>t.k<tk&&!(S[t.id]&&S[t.id].done));const todays=C.tasks.filter(t=>t.k===tk);
+  $("#v-visao").innerHTML=`
+    <h2>Uma família forte não acontece por acaso.</h2>
+    <p class="lead">Preparação (28/09 → 04/10) → aquecimento (05/10 → 06/11) → imersão online paga (07 e 08/11) → Família Forte 2.0 vitalício na Black Friday antecipada. Tudo aqui é editável: passe o mouse em uma seção e clique em ✎.</p>
+    <div class="grid g4 mt">
+      <div class="card kpi"><div class="v">${all.p}%</div><div class="k">${all.d} de ${all.n} tarefas concluídas</div></div>
+      <div class="card kpi"><div class="v">${ph?ph.n.split(" — ")[0]:"—"}</div><div class="k">Fase atual · ${ph?ph.d:"fora do calendário"}</div></div>
+      <div class="card kpi"><div class="v" style="color:${late.length?'var(--bad)':'var(--ok)'}">${late.length}</div><div class="k">Tarefas atrasadas</div></div>
+      <div class="card kpi"><div class="v">${todays.length}</div><div class="k">Tarefas de hoje (${fmtK(tk)})</div></div>
+    </div>
+    <div class="mt2"><span class="eyebrow">Linha do tempo</span>
+      <div class="tl">${PHASES.map(p=>{const pr=progress(C.tasks.filter(t=>t.k>=p.from&&t.k<=p.to));return `<div class="ph ${ph&&ph.id===p.id?'now':''}" style="--c:${p.c}"><b>${p.n}</b><span class="d">${p.d}</span><p>${p.goal}</p><span class="pg">${pr.d}/${pr.n} · ${pr.p}%</span><div class="bar"><i style="width:${pr.p}%"></i></div></div>`}).join("")}</div>
+    </div>
+    <div class="grid g2 mt2">
+      <div class="card soft"><span class="eyebrow">Progresso por frente</span>${Object.entries(FRONTS).map(([id,f])=>{const pr=progress(C.tasks.filter(t=>t.f===id));return `<div style="margin-top:12px"><div class="row" style="justify-content:space-between"><span class="chip"><i class="dot" style="background:${f.c}"></i>${f.n}</span><span class="status">${pr.d}/${pr.n}</span></div><div class="bar" style="margin-top:6px"><i style="width:${pr.p}%;background:${f.c}"></i></div></div>`}).join("")}</div>
+      <div class="card soft"><span class="eyebrow">Últimas decisões registradas</span>${feedHtml(feed().slice(0,5))}</div>
+    </div>
+    ${late.length?`<div class="card mt2" style="border-color:var(--bad)"><span class="eyebrow" style="color:var(--bad)">Atrasadas</span>${late.slice(0,8).map(taskRow).join("")}${late.length>8?`<p class="status" style="padding:10px 16px">+ ${late.length-8} no cronograma</p>`:""}</div>`:""}
+    <div class="card mt2 soft"><span class="eyebrow">Hoje · ${DOW[kd(tk).getDay()]} ${fmtK(tk)}</span>${todays.length?todays.map(taskRow).join(""):'<p class="status" style="margin-top:8px">Nada marcado para hoje.</p>'}${canWrite?`<div class="addrow"><button class="sbtn" data-add="${tk}">+ tarefa para hoje</button></div>`:""}</div>`;
+}
+
+let filt=lsGet("ff_filt")||{f:"all",only:false};
+function renderCron(){
+  const tk=todayKey();
+  const list=sortedTasks().filter(t=>(filt.f==="all"||t.f===filt.f)&&(!filt.only||!(S[t.id]&&S[t.id].done)));
+  const byDay={};list.forEach(t=>{(byDay[t.k]=byDay[t.k]||[]).push(t)});Object.keys(C.marks).forEach(k=>{if(!byDay[k]&&filt.f==="all"&&!filt.only)byDay[k]=[]});
+  const keys=Object.keys(byDay).sort();
+  $("#v-cronograma").innerHTML=`
+    <h2>Cronograma dia a dia</h2>
+    <p class="lead">De 28/09 a 13/11. Marque a tarefa ao concluir e escreva o que foi decidido — vira registro compartilhado. ✎ edita; “+ tarefa” acrescenta o que surgir no caminho.</p>
+    <div class="filters"><button data-f="all" aria-pressed="${filt.f==='all'}">Todas as frentes</button>${Object.entries(FRONTS).map(([id,f])=>`<button data-f="${id}" aria-pressed="${filt.f===id}"><i class="dot" style="background:${f.c}"></i>${f.n}</button>`).join("")}<button data-only="1" aria-pressed="${filt.only}">Só pendentes</button><button data-go="today">Ir para hoje</button>${canWrite?`<button data-addany="1">+ Nova tarefa</button><button data-sec="marks">✎ Marcos</button>`:""}</div>
+    ${keys.map(k=>{const d=kd(k),ph=phaseOfK(k),pr=progress(byDay[k]);return `<div class="day ${k===tk?'today':''}" id="d-${k}"><header><b>${DOW[d.getDay()]} · ${fmtK(k)}</b>${ph?`<span class="ph-tag" style="color:${ph.c}">${ph.n}</span>`:""}${C.marks[k]?`<span class="mark">★ ${esc(C.marks[k])}</span>`:""}<span class="pg">${pr.d}/${pr.n}</span></header>${byDay[k].map(taskRow).join("")}${canWrite?`<div class="addrow"><button class="sbtn" data-add="${k}">+ tarefa em ${fmtK(k)}</button></div>`:""}</div>`}).join("")}`;
+  $("#v-cronograma .filters").onclick=e=>{const b=e.target.closest("button");if(!b)return;
+    if(b.dataset.f){filt.f=b.dataset.f}else if(b.dataset.only){filt.only=!filt.only}else if(b.dataset.go){const el=document.getElementById("d-"+tk)||document.querySelector(".day");if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return}else if(b.dataset.addany){openTask(null);return}else if(b.dataset.sec){openSec(b.dataset.sec);return}
+    lsSet("ff_filt",filt);renderCron();};
+}
+
+function renderFunil(){
+  const col=(id,title,sub,c,rows)=>`<div class="card" style="--c:${c}">${editBtn("funil."+id)}<span class="sub">${sub}</span><h3>${title}</h3><ul class="plain">${rows.map(r=>`<li><b>${esc(r[0])}</b><span class="s">${esc(r[1])}</span><span class="s"><b style="color:var(--gold)">Objetivo:</b> ${esc(r[2])} · <b style="color:var(--gold)">Métrica:</b> ${esc(r[3])}</span></li>`).join("")}</ul></div>`;
+  const lives=C.lives.slice().sort((a,b)=>a.d<b.d?-1:1);
+  $("#v-funil").innerHTML=`
+    <h2>Funil da Paula: topo, meio e fundo</h2>
+    <p class="lead">A Paula já produz vídeos virais — eles são o topo. As lives e o relacionamento (cortes, e-mail, WhatsApp) são o meio. Página, provas, imersão e oferta são o fundo. Cada peça de cada nível segue o ato da semana.</p>
+    <div class="funil">${col("topo","Topo","Descoberta · vídeos virais","var(--f1)",C.funil.topo)}${col("meio","Meio","Consciência · lives e relacionamento","var(--f3)",C.funil.meio)}${col("fundo","Fundo","Decisão · página, imersão, oferta","var(--f6)",C.funil.fundo)}</div>
+    <h3 class="mt2">Programação de lives</h3>
+    <p class="lead">Proposta: 2 lives por semana (terça e quinta, 20h), tema seguindo o ato. Edite dias, horários e temas conforme a agenda da Paula.</p>
+    <div class="tw mt" style="position:relative">${editBtn("lives")}<table><thead><tr><th>Data</th><th>Hora</th><th>Tema</th><th>Ato</th><th>CTA</th></tr></thead><tbody>${lives.map(l=>{const ph=PHASES.find(p=>p.id===l.ato);return `<tr><td class="n">${DOW[kd(l.d).getDay()]} ${fmtK(l.d)}</td><td class="n">${esc(l.h)}</td><td><b>${esc(l.tema)}</b></td><td><span class="tag" style="color:${ph?ph.c:'var(--txt)'}">${ph?ph.n.split(" — ")[0]:esc(l.ato)}</span></td><td><span class="s">${esc(l.cta)}</span></td></tr>`}).join("")}</tbody></table></div>`;
+}
+
+function renderReguas(){
+  $("#v-reguas").innerHTML=`
+    <h2>Réguas de mensagens</h2>
+    <p class="lead">WhatsApp pela API oficial: cada mensagem é um template aprovado pela Meta. A compra do ingresso registra o consentimento — deixe isso escrito no checkout.</p>
+    <div class="card soft mt">${editBtn("waRules")}<span class="eyebrow">Regras da API que entram no cronograma</span><ul class="plain">${C.waRules.map(r=>`<li>${esc(r[0])}${r[1]?`<span class="s">${esc(r[1])}</span>`:""}</li>`).join("")}</ul></div>
+    <h3 class="mt2">WhatsApp (API oficial)</h3>
+    <div class="tw mt" style="position:relative">${editBtn("wa")}<table><thead><tr><th>Gatilho / data</th><th>Hora</th><th>Mensagem</th><th>Conteúdo</th><th>Tipo</th></tr></thead><tbody>${C.wa.map(r=>`<tr><td class="n">${esc(r[0])}</td><td class="n">${esc(r[1])}</td><td><b>${esc(r[2])}</b></td><td><span class="s">${esc(r[3])}</span></td><td><span class="tag">${esc(r[4])}</span></td></tr>`).join("")}</tbody></table></div>
+    <h3 class="mt2">E-mail</h3>
+    <div class="tw mt" style="position:relative">${editBtn("em")}<table><thead><tr><th>Data</th><th>E-mail</th><th>Observação</th></tr></thead><tbody>${C.em.map(r=>`<tr><td class="n">${esc(r[0])}</td><td><b>${esc(r[1])}</b></td><td><span class="s">${esc(r[2])}</span></td></tr>`).join("")}</tbody></table></div>`;
+}
+
+function renderTrafego(){
+  $("#v-trafego").innerHTML=`
+    <h2>Tráfego</h2>
+    <p class="lead">A métrica-mãe é <b>CPA de ingresso</b> por lote. Captação 05/10 → 06/11; remarketing de carrinho do FF 2.0 de 08/11 a 12/11. Os virais da Paula alimentam os públicos de visualização.</p>
+    <div class="grid g3 mt" style="position:relative">${C.trafCards.map((r,i)=>`<div class="card">${i===0?editBtn("trafCards"):""}<span class="eyebrow">${esc(r[0])}</span><p style="margin-top:8px">${esc(r[1])}</p><p class="status" style="margin-top:8px">${esc(r[2])}</p></div>`).join("")}</div>
+    <div class="grid g2 mt2">
+      <div class="card soft">${editBtn("trafMeta")}<span class="eyebrow">Rotina semanal (Meta)</span><ul class="plain">${C.trafMeta.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div class="card soft">${editBtn("trafGoogle")}<span class="eyebrow">Rotina semanal (Google / YouTube)</span><ul class="plain">${C.trafGoogle.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+    </div>`;
+}
+
+function renderImersao(){
+  const blk=r=>r.map(([h,s])=>`<div class="block"><span class="h">${esc(h)}</span><span>${esc(s)}</span></div>`).join("");
+  const li=r=>r.map(x=>`<li><b>${esc(x[0])}</b>${x[1]?`<span class="s">${esc(x[1])}</span>`:""}</li>`).join("");
+  $("#v-imersao").innerHTML=`
+    <h2>Imersão · 07 e 08 de novembro</h2>
+    <p class="lead">100% online e paga. Não pode parecer palestra longa nem curso de birra: é a experiência em que a mãe organiza o cenário da família, entende os fundamentos e sai sabendo o que precisa começar.</p>
+    <div class="dayplan">
+      <div class="card">${editBtn("d1")}<span class="eyebrow">Sábado 07/11 — Dia 1</span><h3 style="margin:6px 0 10px">Reconhecer → entender → descobrir</h3>${blk(C.d1)}</div>
+      <div class="card">${editBtn("d2")}<span class="eyebrow">Domingo 08/11 — Dia 2</span><h3 style="margin:6px 0 10px">Aplicar → método → Família Forte 2.0</h3>${blk(C.d2)}</div>
+    </div>
+    <div class="grid g2 mt2">
+      <div class="card soft">${editBtn("ingressos")}<span class="eyebrow">Ingresso — 3 lotes</span><ul class="plain">${li(C.ingressos)}</ul>${DEC.lote2||DEC.lote3?`<p class="status" style="margin-top:8px">Decidido: Lote 2 ${esc(DEC.lote2||"—")} · Lote 3 ${esc(DEC.lote3||"—")}</p>`:""}</div>
+      <div class="card soft">${editBtn("ofertaFF")}<span class="eyebrow">Oferta Família Forte 2.0</span><ul class="plain">${li(C.ofertaFF)}</ul>${DEC.precoFF||DEC.fechaCarrinho?`<p class="status" style="margin-top:8px">Decidido: ${esc(DEC.precoFF||"")} ${DEC.fechaCarrinho?"· fecha "+esc(DEC.fechaCarrinho):""}</p>`:""}</div>
+    </div>`;
+}
+
+function renderNarrativa(){
+  $("#v-narrativa").innerHTML=`
+    <h2>Narrativa & regras de produção</h2>
+    <p class="lead">Antes de produzir qualquer peça: <b>“Em qual ato estamos e qual conclusão essa mãe precisa ter depois de consumir isso?”</b> Sem resposta clara, a peça não entra.</p>
+    <div class="grid g2 mt">
+      <div class="card">${editBtn("tensao")}<span class="eyebrow">Tensão dramática</span><p class="quote" style="margin-top:10px">${esc(C.tensao[0])}</p><p class="status" style="margin-top:10px">${esc(C.tensao[1])}</p></div>
+      <div class="card">${editBtn("conclusoes")}<span class="eyebrow">As 4 conclusões, nesta ordem</span><ul class="plain">${C.conclusoes.map(x=>`<li><b>${esc(x[0])}</b> — ${esc(x[1])}</li>`).join("")}</ul></div>
+    </div>
+    <div class="card soft mt">${editBtn("linguagem")}<span class="eyebrow">Linguagem: zero técnica na entrada</span><div class="grid g3" style="margin-top:10px">${C.linguagem.map(x=>`<div><b style="color:var(--gold)">${esc(x[0])}</b><br><span class="status">${esc(x[1])}</span></div>`).join("")}</div></div>
+    <div class="row mt2" style="justify-content:space-between"><h3>Frases-mãe</h3>${canWrite?`<button class="ed" data-sec="frases">✎ Editar</button>`:""}</div>
+    <div class="grid g2 mt">${C.frases.map(f=>`<p class="quote" style="font-size:17px">${esc(f)}</p>`).join("")}</div>
+    <h3 class="mt2">Objeções que a narrativa desmonta antes da oferta</h3>
+    <div class="card soft mt">${editBtn("obj")}${C.obj.map(([q,a])=>`<div class="obj"><span class="q">${esc(q)}</span><span>${esc(a)}</span></div>`).join("")}</div>
+    <div class="grid g2 mt2">
+      <div class="card" style="border-color:var(--bad)">${editBtn("nao")}<span class="eyebrow" style="color:var(--bad)">O que NÃO fazer</span><ul class="plain">${C.nao.map(n=>`<li>${esc(n)}</li>`).join("")}</ul></div>
+      <div class="card soft">${editBtn("canais")}<span class="eyebrow">Função de cada canal</span><ul class="plain">${C.canais.map(([c,f])=>`<li><b>${esc(c)}</b> — ${esc(f)}</li>`).join("")}</ul></div>
+    </div>`;
+}
+
+const DECF=[["nome","Nome definitivo da imersão","Família Forte — O Começo (provisório)"],["horario","Horários dos dois dias","ex.: sáb 9h–12h · dom 9h–13h"],["plataforma","Plataforma de transmissão e acesso",""],["livesSemana","Lives por semana (dias e horários fixos)","ex.: ter e qui, 20h"],["lote2","Lote 2 — preço e data","ex.: R$ 47 a partir de 15/10"],["lote3","Lote 3 — preço e data","ex.: R$ 67 a partir de 26/10"],["precoFF","Família Forte 2.0 — preço vitalício (BF antecipada)",""],["bonusVivo","Bônus de quem decide ao vivo",""],["fechaCarrinho","Fechamento do carrinho FF 2.0","proposta: 12/11 à meia-noite"],["bsp","Provedor da API oficial (BSP) e número",""],["resp","Responsáveis por frente","Paula · Jez · tráfego · copy · operação"]];
+function renderDecisoes(){
+  if(document.activeElement&&$("#v-decisoes").contains(document.activeElement)&&document.activeElement.tagName==="INPUT")return;
+  $("#v-decisoes").innerHTML=`
+    <h2>Decisões & registro</h2>
+    <p class="lead">À esquerda, o que precisa ser batido. À direita, a sequência de tudo que foi decidido no caminho — cada tarefa concluída entra aqui com a anotação de quem concluiu.</p>
+    <div class="grid g2 mt" style="align-items:start">
+      <div class="card"><span class="eyebrow">Decisões estruturais</span><div class="grid" style="margin-top:12px">${DECF.map(([id,l,p])=>`<div class="field"><label for="dec-${id}">${l}</label><input id="dec-${id}" placeholder="${esc(p)}" value="${esc(DEC[id]||"")}"></div>`).join("")}</div><div class="row mt"><button class="btn" id="saveDec" ${canWrite?'':'disabled'}>Salvar decisões</button><span class="status" id="decStatus"></span></div></div>
+      <div class="card soft"><div class="row" style="justify-content:space-between"><span class="eyebrow">Registro em sequência</span>${canWrite?`<button class="sbtn" id="addLog">+ registro</button>`:""}</div>${feedHtml(feed())}</div>
+    </div>`;
+  $("#saveDec").onclick=async()=>{const o={};DECF.forEach(([id])=>{o[id]=document.getElementById("dec-"+id).value.trim()});DEC=o;$("#decStatus").textContent="Salvando…";await persist("dec");$("#decStatus").textContent=canWrite?"Salvo para toda a equipe.":"Somente leitura.";renderImersao();$("#brandName").textContent=DEC.nome||"Família Forte — O Começo";toast("Decisões salvas");};
+  const al=$("#addLog");if(al)al.onclick=openLog;
+}
+
+function renderAll(){renderVisao();renderCron();renderFunil();renderReguas();renderTrafego();renderImersao();renderNarrativa();renderDecisoes();$("#brandName").textContent=DEC.nome||"Família Forte — O Começo";}
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),1800);}
+
+/* eventos delegados */
+document.addEventListener("change",e=>{
+  const cb=e.target;if(!cb.matches||!cb.matches("input[type=checkbox][data-id]"))return;
+  const id=cb.dataset.id;
+  if(cb.checked){openDone(id,cb);}else{S[id]={done:false,at:new Date().toISOString(),who:me};persist("tasks");renderAll();}
+});
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.sec&&!b.closest(".filters")){openSec(b.dataset.sec)}
+  else if(b.dataset.edit){openTask(b.dataset.edit)}
+  else if(b.dataset.add){openTask(null,b.dataset.add)}
+  else if(b.dataset.dellog){if(confirm("Remover este registro?")){LOG=LOG.filter(l=>l.id!==b.dataset.dellog);persist("log");renderAll();}}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+function setSync(on,txt){$("#sync").classList.toggle("on",on);$("#syncTxt").textContent=txt;}
+
+/* boot */
+renderTabs();renderAll();showTab();
+const API="/api/state";
+async function makeStore(){
+  const db=window.claude&&window.claude.use?await window.claude.use("db"):null;
+  if(db){return {kind:"claude",label:"Compartilhado com a equipe",doc(n){const r=db.doc("state/"+n);return {set:d=>r.set(d),onSnapshot:(cb,err)=>r.onSnapshot(s=>cb(s.exists?s.data():null),err)};}};}
+  try{
+    const r=await fetch(API+"?doc=ping",{cache:"no-store"});
+    if(r.ok){return {kind:"netlify",label:"Compartilhado (Netlify)",doc(n){let last;return {
+      async set(d){last=JSON.stringify(d);const res=await fetch(API+"?doc="+n,{method:"PUT",headers:{"content-type":"application/json"},body:last});if(!res.ok)throw{code:res.status===403?"invalid_argument":"unavailable"};},
+      onSnapshot(cb,err){const tick=async()=>{try{const res=await fetch(API+"?doc="+n,{cache:"no-store"});if(!res.ok)return;const j=await res.json();const str=JSON.stringify(j.data);if(str!==last){last=str;cb(j.data);}}catch(e){}};tick();const id=setInterval(tick,10000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)tick();});return ()=>clearInterval(id);}
+    };}};}
+  }catch(e){}
+  return null;
+}
+(async()=>{
+  const store=await makeStore();
+  if(!store){setSync(false,"Só neste dispositivo");return;}
+  try{
+    refs.content=store.doc("content");refs.tasks=store.doc("tasks");refs.dec=store.doc("decisions");refs.log=store.doc("log");
+    refs.content.onSnapshot(d=>{if(d){if(d.v===CONTENT_V){C=JSON.parse(JSON.stringify(d));lsSet("ff_content",C);renderAll();}else if(canWrite&&!migrated){migrated=true;C=defaultContent();persist("content");toast("Cronograma atualizado para a estrutura nova");}}setSync(true,store.label);},()=>setSync(false,"Sem sincronização"));
+    refs.tasks.onSnapshot(d=>{if(d&&d.tasks){S=Object.assign({},d.tasks);lsSet("ff_tasks",S);renderAll();}},()=>{});
+    refs.dec.onSnapshot(d=>{if(d){DEC=Object.assign({},d);lsSet("ff_dec",DEC);renderImersao();if(cur!=="decisoes")renderDecisoes();$("#brandName").textContent=DEC.nome||"Família Forte — O Começo";}},()=>{});
+    refs.log.onSnapshot(d=>{if(d&&d.items){LOG=d.items.slice();lsSet("ff_log",LOG);renderVisao();renderDecisoes();}},()=>{});
+  }catch(e){setSync(false,"Só neste dispositivo");}
+})();
+</script>
+
+</body>
+</html>
