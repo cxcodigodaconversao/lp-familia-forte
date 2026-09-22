@@ -1,9 +1,0 @@
-{
-  "name": "ppv-familia-forte",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Painel de orquestração do lançamento Família Forte — O Começo",
-  "dependencies": {
-    "@netlify/blobs": "^8.1.0"
-  }
-}
