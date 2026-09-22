@@ -7,16 +7,16 @@ const FRONTS = {
   cont: { n: "Conteúdo & Lives", c: "var(--f1)" },
   traf: { n: "Tráfego", c: "var(--f2)" },
   copy: { n: "Copy & E-mail", c: "var(--f3)" },
-  wa: { n: "WhatsApp API", c: "var(--f4)" },
+  wa: { n: "WhatsApp & ManyChat", c: "var(--f4)" },
   tech: { n: "Páginas & Ferramentas", c: "var(--f5)" },
   ev: { n: "Evento & Oferta", c: "var(--f6)" }
 };
 const ROLES = { admin: "Administrador", gestor_projetos: "Gestor de projetos", gestor_trafego: "Gestor de tráfego", copywriter: "Copywriter", expert: "Expert (Paula)", operacao: "Operação / WhatsApp", visualizador: "Visualizador" };
 const PHASES = [
   { id: "prep", n: "Preparação", d: "28/09 → 04/10", from: "2026-09-28", to: "2026-10-04", c: "var(--f5)", goal: "Semana 28/09 → 04/10: páginas, checkout do ingresso, API oficial aprovada, criativos e programação — tudo pronto antes da captação abrir em 05/10." },
-  { id: "ato1", n: "Ato 1 — O espelho", d: "05/10 → 14/10", from: "2026-10-05", to: "2026-10-14", c: "var(--f1)", goal: "Reconhecimento: “Ela está falando da minha casa.” Lote 1 do ingresso aberto (R$ 27,90)." },
-  { id: "ato2", n: "Ato 2 — A descoberta", d: "15/10 → 25/10", from: "2026-10-15", to: "2026-10-25", c: "var(--f3)", goal: "Quebra de crença: “Talvez eu esteja resolvendo do jeito errado.” Virada para o Lote 2." },
-  { id: "ato3", n: "Ato 3 — O futuro possível", d: "26/10 → 06/11", from: "2026-10-26", to: "2026-11-06", c: "var(--f2)", goal: "Esperança concreta: provas, antes/depois. Convite intensifica. Lote 3 e última chamada." },
+  { id: "ato1", n: "Ato 1 — O espelho", d: "05/10 → 14/10", from: "2026-10-05", to: "2026-10-14", c: "var(--f1)", goal: "Reconhecimento: “Ela está falando da minha casa.” Lote 1 do ingresso aberto (R$ 27,90 · 05/10 → 31/10). Todo post com CTA da palavra-chave." },
+  { id: "ato2", n: "Ato 2 — A descoberta", d: "15/10 → 25/10", from: "2026-10-15", to: "2026-10-25", c: "var(--f3)", goal: "Quebra de crença: “Talvez eu esteja resolvendo do jeito errado.” Lote 1 continua (a urgência ainda é de conclusão, não de preço)." },
+  { id: "ato3", n: "Ato 3 — O futuro possível", d: "26/10 → 06/11", from: "2026-10-26", to: "2026-11-06", c: "var(--f2)", goal: "Esperança concreta: provas, antes/depois. Convite intensifica. Lote 1 até 31/10 · Lote 2 01→05/11 · Lote 3 06 e 07/11 (última chamada)." },
   { id: "ato4", n: "Ato 4 — Imersão + Oferta", d: "07/11 → 13/11", from: "2026-11-07", to: "2026-11-13", c: "var(--f6)", goal: "Dois dias que organizam tudo → Família Forte 2.0 vitalício (Black Friday antecipada) → fechamento e debrief." }
 ];
 const DOW = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
@@ -94,6 +94,7 @@ async function loadAll() {
   TASKS = {}; (t.data || []).forEach(r => TASKS[r.id] = r);
   STATUS = {}; (s.data || []).forEach(r => STATUS[r.task_id] = r);
   C = c.data && c.data.data && Object.keys(c.data.data).length ? c.data.data : null;
+  if (C) { Object.entries(window.PPV_SEED.content).forEach(([k, v]) => { if (C[k] === undefined) C[k] = JSON.parse(JSON.stringify(v)); }); }
   DEC = d.data ? d.data.data || {} : {};
   LOGS = l.data || [];
   setSync(true, "Conectado");
@@ -137,6 +138,8 @@ const SEC = {
   d1: { t: "Imersão — Dia 1", f: ["bloco", "conteúdo"], get: () => C.d1, set: r => C.d1 = r },
   d2: { t: "Imersão — Dia 2", f: ["bloco", "conteúdo"], get: () => C.d2, set: r => C.d2 = r },
   ingressos: { t: "Ingresso — lotes", f: ["item", "detalhe"], get: () => C.ingressos, set: r => C.ingressos = r },
+  paginas: { t: "Páginas de venda (A sem VSL · B com VSL)", f: ["item", "detalhe"], get: () => C.paginas || [], set: r => C.paginas = r },
+  manychat: { t: "ManyChat (palavra-chave → link do ingresso)", f: ["item", "detalhe"], get: () => C.manychat || [], set: r => C.manychat = r },
   ofertaFF: { t: "Oferta Família Forte 2.0", f: ["item", "detalhe"], get: () => C.ofertaFF, set: r => C.ofertaFF = r },
   tensao: { t: "Tensão dramática", f: ["frase", "explicação"], get: () => [C.tensao], set: r => C.tensao = r[0] || ["", ""] },
   conclusoes: { t: "As 4 conclusões", f: ["frase", "etapa"], get: () => C.conclusoes, set: r => C.conclusoes = r },
@@ -292,10 +295,11 @@ function renderFunil() {
   const lives = (C.lives || []).slice().sort((a, b) => a.d < b.d ? -1 : 1);
   $("#v-funil").innerHTML = `
     <h2>Funil da Paula: topo, meio e fundo</h2>
-    <p class="lead">Os vídeos virais que a Paula já produz são o topo. Lives e relacionamento (cortes, e-mail, WhatsApp) são o meio. Página, provas, imersão e oferta são o fundo. Cada peça segue o ato da semana.</p>
+    <p class="lead">A base de conteúdo da Paula no Instagram <b>não muda</b>: os posts que ela já produz são o topo. A partir de 05/10, toda legenda termina com a CTA da palavra-chave (ManyChat → link do ingresso) e entram as lives chamando para o evento. Lives e relacionamento (cortes, e-mail, WhatsApp) são o meio. Páginas, provas, imersão e oferta são o fundo. Cada peça segue o ato da semana.</p>
     <div class="funil">${col("topo", "Topo", "Descoberta · vídeos virais", "var(--f1)", C.funil.topo)}${col("meio", "Meio", "Consciência · lives e relacionamento", "var(--f3)", C.funil.meio)}${col("fundo", "Fundo", "Decisão · página, imersão, oferta", "var(--f6)", C.funil.fundo)}</div>
-    <h3 class="mt2">Programação de lives</h3>
-    <p class="lead">Proposta: 2 lives por semana (terça e quinta, 20h), tema seguindo o ato.</p>
+    <div class="card soft mt2">${editBtn("manychat")}<span class="eyebrow">ManyChat — comentário/DM com a palavra-chave → link do ingresso${DEC.palavraChave ? ` · palavra: <b>${esc(DEC.palavraChave)}</b>` : ""}</span><ul class="plain">${(C.manychat || []).map(x => `<li><b>${esc(x[0])}</b>${x[1] ? `<span class="s">${esc(x[1])}</span>` : ""}</li>`).join("")}</ul></div>
+    <h3 class="mt2">Programação de lives (chamando para o evento)</h3>
+    <p class="lead">Proposta: 2 lives por semana (terça e quinta, 20h), tema seguindo o ato. Toda live tem convite explícito para a imersão + palavra-chave.</p>
     <div class="tw rel mt">${editBtn("lives")}<table><thead><tr><th>Data</th><th>Hora</th><th>Tema</th><th>Ato</th><th>CTA</th></tr></thead><tbody>${lives.map(l => { const ph = PHASES.find(p => p.id === l.ato); return `<tr><td class="n">${DOW[kd(l.d).getDay()]} ${fmtK(l.d)}</td><td class="n">${esc(l.h)}</td><td><b>${esc(l.tema)}</b></td><td><span class="tag" style="color:${ph ? ph.c : "var(--txt)"}">${ph ? ph.n.split(" — ")[0] : esc(l.ato)}</span></td><td><span class="s">${esc(l.cta)}</span></td></tr>`; }).join("")}</tbody></table></div>`;
 }
 const emptyC = () => `<div class="banner"><b>Conteúdo ainda não importado.</b><span class="status">${isAdmin() ? "Vá em Configurações → Importar cronograma padrão." : "Aguarde o administrador importar o conteúdo."}</span></div>`;
@@ -315,7 +319,7 @@ function renderTrafego() {
   if (!C) { $("#v-trafego").innerHTML = emptyC(); return; }
   $("#v-trafego").innerHTML = `
     <h2>Tráfego</h2>
-    <p class="lead">A métrica-mãe é <b>CPA de ingresso</b> por lote. Captação 05/10 → 06/11; remarketing de carrinho do FF 2.0 de 08/11 a 12/11.</p>
+    <p class="lead">A métrica-mãe é <b>CPA de ingresso</b> por lote. Captação 05/10 → 07/11 (preço muda 01/11 e 06/11); teste A/B de páginas 05→11/10; remarketing de carrinho do FF 2.0 de 08/11 a 12/11.</p>
     <div class="grid g3 mt">${C.trafCards.map((r, i) => `<div class="card">${i === 0 ? editBtn("trafCards") : ""}<span class="eyebrow">${esc(r[0])}</span><p style="margin-top:8px">${esc(r[1])}</p><p class="status" style="margin-top:8px">${esc(r[2])}</p></div>`).join("")}</div>
     <div class="grid g2 mt2">
       <div class="card soft">${editBtn("trafMeta")}<span class="eyebrow">Rotina semanal (Meta)</span><ul class="plain">${C.trafMeta.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
@@ -334,7 +338,8 @@ function renderImersao() {
       <div class="card">${editBtn("d2")}<span class="eyebrow">Domingo 08/11 — Dia 2</span><h3 style="margin:6px 0 10px">Aplicar → método → Família Forte 2.0</h3>${blk(C.d2)}</div>
     </div>
     <div class="grid g2 mt2">
-      <div class="card soft">${editBtn("ingressos")}<span class="eyebrow">Ingresso — 3 lotes</span><ul class="plain">${li(C.ingressos)}</ul>${DEC.lote2 || DEC.lote3 ? `<p class="status" style="margin-top:8px">Decidido: Lote 2 ${esc(DEC.lote2 || "—")} · Lote 3 ${esc(DEC.lote3 || "—")}</p>` : ""}</div>
+      <div class="card soft">${editBtn("ingressos")}<span class="eyebrow">Ingresso — 3 lotes (não acompanham os atos)</span><ul class="plain">${li(C.ingressos)}</ul>${DEC.lote2 || DEC.lote3 ? `<p class="status" style="margin-top:8px">Decidido: Lote 2 ${esc(DEC.lote2 || "—")} · Lote 3 ${esc(DEC.lote3 || "—")}</p>` : ""}</div>
+      <div class="card soft">${editBtn("paginas")}<span class="eyebrow">Páginas de venda do ingresso${DEC.paginaVencedora ? ` · vencedora: <b>${esc(DEC.paginaVencedora)}</b>` : ""}</span><ul class="plain">${li(C.paginas || [])}</ul></div>
       <div class="card soft">${editBtn("ofertaFF")}<span class="eyebrow">Oferta Família Forte 2.0</span><ul class="plain">${li(C.ofertaFF)}</ul>${DEC.precoFF || DEC.fechaCarrinho ? `<p class="status" style="margin-top:8px">Decidido: ${esc(DEC.precoFF || "")} ${DEC.fechaCarrinho ? "· fecha " + esc(DEC.fechaCarrinho) : ""}</p>` : ""}</div>
     </div>`;
 }
@@ -358,7 +363,7 @@ function renderNarrativa() {
     </div>`;
 }
 
-const DECF = [["nome", "Nome definitivo da imersão", "Família Forte — O Começo (provisório)"], ["horario", "Horários dos dois dias", "ex.: sáb 9h–12h · dom 9h–13h"], ["plataforma", "Plataforma de transmissão e acesso", ""], ["livesSemana", "Lives por semana (dias e horários fixos)", "ex.: ter e qui, 20h"], ["lote2", "Lote 2 — preço e data", "ex.: R$ 47 a partir de 15/10"], ["lote3", "Lote 3 — preço e data", "ex.: R$ 67 a partir de 26/10"], ["precoFF", "Família Forte 2.0 — preço vitalício (BF antecipada)", ""], ["bonusVivo", "Bônus de quem decide ao vivo", ""], ["fechaCarrinho", "Fechamento do carrinho FF 2.0", "proposta: 12/11 à meia-noite"], ["bsp", "Provedor da API oficial (BSP) e número", ""]];
+const DECF = [["nome", "Nome definitivo da imersão", "Família Forte — O Começo (provisório)"], ["horario", "Horários dos dois dias", "ex.: sáb 9h–12h · dom 9h–13h"], ["plataforma", "Plataforma de transmissão e acesso", ""], ["livesSemana", "Lives por semana (dias e horários fixos)", "ex.: ter e qui, 20h"], ["lote2", "Lote 2 — preço (vira em 01/11, vale até 05/11)", "ex.: R$ 47"], ["lote3", "Lote 3 — preço (só 06 e 07/11)", "ex.: R$ 67"], ["palavraChave", "Palavra-chave do ManyChat (comentário/DM → link do ingresso)", "ex.: FAMÍLIA"], ["paginaVencedora", "Página vencedora do teste A/B (decisão 12/10)", "A (sem VSL) ou B (com VSL)"], ["linkIngresso", "Link da página do ingresso usado no ManyChat, bio e stories", ""], ["precoFF", "Família Forte 2.0 — preço vitalício (BF antecipada)", ""], ["bonusVivo", "Bônus de quem decide ao vivo", ""], ["fechaCarrinho", "Fechamento do carrinho FF 2.0", "proposta: 12/11 à meia-noite"], ["bsp", "Provedor da API oficial (BSP) e número", ""]];
 function renderDecisoes() {
   if (document.activeElement && $("#v-decisoes").contains(document.activeElement) && document.activeElement.tagName === "INPUT") return;
   const feed = LOGS.filter(l => ["task_done", "note", "decisions_save"].includes(l.action));
@@ -423,6 +428,7 @@ function renderConfig() {
         <p style="margin-top:8px">${nT} tarefa(s) no banco${C ? " · conteúdo importado" : " · conteúdo ainda não importado"}.</p>
         <div class="row mt"><button class="btn" id="seedBtn">Importar cronograma padrão</button><span class="status" id="seedStatus"></span></div>
         <p class="hint" style="margin-top:10px">Insere as tarefas e seções que ainda não existem (não sobrescreve o que já foi editado). Pode rodar de novo com segurança.</p>
+        <div class="row mt"><button class="btn ghost" id="seedSync">Atualizar tarefas do cronograma padrão (novas + alteradas)</button><span class="status">Atualiza datas, textos e dependências das tarefas padrão. Não mexe no que já foi concluído.</span></div>
         <div class="row mt"><button class="btn ghost" id="seedForce">Restaurar TODO o conteúdo padrão (seções)</button></div>
       </div>
     </div>
@@ -430,6 +436,7 @@ function renderConfig() {
     <div class="users">${PROFILES.map(p => `<div class="user"><div><b>${esc(p.name || "(sem nome)")}</b> <span class="rolepill">${roleName(p.role)}</span>${!p.active ? ' <span class="tag" style="color:var(--bad)">desativado</span>' : ""}<div class="em">${esc(p.email)}</div></div><div class="acts"><select class="mini" data-role="${p.id}">${Object.entries(ROLES).map(([k, n]) => `<option value="${k}" ${p.role === k ? "selected" : ""}>${n}</option>`).join("")}</select><button class="ed" data-rename="${p.id}">nome</button><button class="ed" data-pass="${p.id}">senha</button><button class="ed" data-toggle="${p.id}">${p.active ? "desativar" : "ativar"}</button>${p.id !== ME.id ? `<button class="ed" data-udel="${p.id}" style="color:var(--bad)">excluir</button>` : ""}</div></div>`).join("")}</div>`;
   $("#uCreate").onclick = async () => { const b = { action: "create", name: $("#uName").value.trim(), email: $("#uEmail").value.trim(), password: $("#uPass").value, role: $("#uRole").value }; $("#uStatus").textContent = "Criando…"; try { await adminApi(b); $("#uStatus").textContent = "Criado. Envie e-mail e senha para a pessoa."; toast("Usuário criado"); scheduleRefresh(); } catch (e) { $("#uStatus").textContent = ""; err(e); } };
   $("#seedBtn").onclick = () => importSeed(false);
+  $("#seedSync").onclick = () => { if (confirm("Isso atualiza data, título, detalhe, responsável e dependências de TODAS as tarefas do cronograma padrão (edições manuais nessas tarefas são substituídas). Conclusões e justificativas são mantidas. Continuar?")) importSeed(false, true); };
   $("#seedForce").onclick = () => { if (confirm("Isso substitui TODAS as seções editáveis (funil, réguas, roteiro, narrativa…) pelo padrão. As tarefas não são tocadas. Continuar?")) importSeed(true); };
   $("#v-config .users").onclick = async e => {
     const b = e.target.closest("button"); if (!b) return;
@@ -443,14 +450,15 @@ function renderConfig() {
   };
   $("#v-config .users").onchange = async e => { const s = e.target; if (!s.dataset.role) return; try { await adminApi({ action: "update", id: s.dataset.role, role: s.value }); toast("Papel alterado"); scheduleRefresh(); } catch (ex) { err(ex); } };
 }
-async function importSeed(force) {
+async function importSeed(force, sync) {
   const seed = window.PPV_SEED; const st = $("#seedStatus"); st.textContent = "Importando…";
   try {
     const missing = seed.tasks.filter(t => !TASKS[t.id]).map(t => Object.assign({}, t, { created_by: ME.id }));
-    for (let i = 0; i < missing.length; i += 100) { const { error } = await sb.from("tasks").upsert(missing.slice(i, i + 100)); if (error) throw error; }
+    const rows = sync ? seed.tasks.map(t => TASKS[t.id] ? { id: t.id, k: t.k, f: t.f, t: t.t, s: t.s, r: t.r, depends_on: t.depends_on, owner_role: t.owner_role, updated_at: new Date().toISOString() } : Object.assign({}, t, { created_by: ME.id })) : missing;
+    for (let i = 0; i < rows.length; i += 100) { const { error } = await sb.from("tasks").upsert(rows.slice(i, i + 100)); if (error) throw error; }
     if (force || !C) { const { error } = await sb.from("content").upsert({ id: "main", v: seed.CONTENT_V, data: seed.content, updated_at: new Date().toISOString(), updated_by: ME.id }); if (error) throw error; }
-    await log("seed_import", "cronograma", "", `Importou cronograma padrão (${missing.length} tarefas novas${force ? ", conteúdo restaurado" : ""})`, {});
-    st.textContent = `Pronto: ${missing.length} tarefa(s) adicionada(s).`; toast("Cronograma importado"); scheduleRefresh();
+    await log("seed_import", "cronograma", "", `Importou cronograma padrão (${missing.length} tarefas novas${sync ? `, ${rows.length - missing.length} atualizadas` : ""}${force ? ", conteúdo restaurado" : ""})`, {});
+    st.textContent = `Pronto: ${missing.length} tarefa(s) adicionada(s)${sync ? `, ${rows.length - missing.length} atualizada(s)` : ""}.`; toast("Cronograma importado"); scheduleRefresh();
   } catch (e) { st.textContent = ""; err(e); }
 }
 
