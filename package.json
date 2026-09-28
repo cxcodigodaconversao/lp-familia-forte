@@ -1,0 +1,9 @@
+{
+  "name": "ppv-familia-forte",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Painel de orquestração do lançamento Família Forte — O Começo (Supabase + Netlify)",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}
