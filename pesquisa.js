@@ -254,7 +254,7 @@ async function askAI(question) {
     const { data: { session } } = await sb.auth.getSession();
     const r = await fetch("/api/insights", { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + session.access_token }, body: JSON.stringify({ stats, context, question: question || undefined }) });
     const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || "erro " + r.status);
-    if (question) { const prev = C.pesquisaAI || {}; C.pesquisaAI = Object.assign({}, prev, j, { resposta: j.resumo, _meta: j._meta }); } else C.pesquisaAI = j;
+    if (question) { const prev = C.pesquisaAI || {}; C.pesquisaAI = Object.assign({}, prev, { resposta: j.resumo, _meta: j._meta }); } else C.pesquisaAI = j;
     await saveContent("pesquisaAI"); toast("Análise salva"); renderPesquisa();
   } catch (e) { st.textContent = ""; $("#aiRun").disabled = false; err(e); }
 }

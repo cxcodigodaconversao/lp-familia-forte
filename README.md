@@ -17,9 +17,9 @@ config.js                          # URL e chave anon do Supabase (preencher)
 supabase/schema.sql                # tabelas, regras de acesso, gatilhos, tempo real, e-mails dos admins, leads
 supabase/leads.sql                 # só a tabela de leads (para quem já rodou o schema antigo)
 scripts/create-admins.mjs          # cria os dois administradores com a senha que você escolher
-netlify/functions/admin-users.mjs  # API de usuários (só administradores; usa a chave service_role)
+netlify/functions/admin-users.mjs  # API de usuários: criar, papel, nome, senha, ativar/desativar, excluir (só administradores; usa a chave service_role)
 netlify/functions/assistant.mjs    # assistente de IA (chat com contexto do painel)
-netlify/functions/insights.mjs     # IA da pesquisa (só administradores; usa ANTHROPIC_API_KEY)
+netlify/functions/insights.mjs     # IA da pesquisa: recebe só números agregados e devolve dores, temas, frases, objeções e propostas (só administradores; usa ANTHROPIC_API_KEY)
 netlify.toml                       # publicação e headers
 package.json                       # dependência da função
 ```
@@ -29,7 +29,7 @@ package.json                       # dependência da função
 1. Supabase: rode `supabase/schema.sql`; crie os usuários everton@comercial10x.com.br e jezreel@comercial10x.com.br (já nascem como administradores — ver `SUPABASE.md`).
 2. Preencha `config.js`.
 3. `git push` → Netlify publica sozinho.
-4. Netlify → Environment variables: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` → Trigger deploy.
+4. Netlify → Environment variables: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` e `ANTHROPIC_API_KEY` (liga o assistente ✦ IA e a IA da Pesquisa) → Trigger deploy.
 5. Entre no site → Configurações → Importar cronograma padrão → cadastrar equipe.
 
 ## Rodar localmente
