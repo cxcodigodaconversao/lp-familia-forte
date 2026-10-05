@@ -228,10 +228,10 @@ async function undoTask(id, cb) {
 }
 
 /* ---------------- render ---------------- */
-function TABS() { const t = [["visao", "Visão geral"], ["cronograma", "Cronograma"], ["funil", "Funil & Lives"], ["reguas", "Réguas"], ["trafego", "Tráfego"], ["imersao", "Imersão & Oferta"], ["narrativa", "Narrativa"], ["decisoes", "Decisões"], ["pesquisa", "Pesquisa"], ["registro", "Registro"]]; if (isAdmin()) t.push(["config", "Configurações"]); return t; }
+function TABS() { const t = [["visao", "Visão geral"], ["cronograma", "Cronograma"], ["kanban", "Kanban"], ["funil", "Funil & Lives"], ["reguas", "Réguas"], ["trafego", "Tráfego"], ["imersao", "Imersão & Oferta"], ["narrativa", "Narrativa"], ["decisoes", "Decisões"], ["pesquisa", "Pesquisa"], ["registro", "Registro"]]; if (isAdmin()) t.push(["config", "Configurações"]); return t; }
 let cur = lsGet("ff_tab") || "visao";
 function renderTabs() { if (!TABS().some(([id]) => id === cur)) cur = "visao"; $("#tabs").innerHTML = TABS().map(([id, n]) => `<button role="tab" aria-selected="${cur === id}" data-t="${id}">${n}</button>`).join(""); $("#tabs").onclick = e => { const b = e.target.closest("button"); if (!b) return; cur = b.dataset.t; lsSet("ff_tab", cur); renderTabs(); showTab(); }; }
-function showTab() { ["visao", "cronograma", "funil", "reguas", "trafego", "imersao", "narrativa", "decisoes", "pesquisa", "registro", "config"].forEach(id => { $("#v-" + id).hidden = cur !== id; }); window.scrollTo({ top: 0 }); }
+function showTab() { ["visao", "cronograma", "kanban", "funil", "reguas", "trafego", "imersao", "narrativa", "decisoes", "pesquisa", "registro", "config"].forEach(id => { $("#v-" + id).hidden = cur !== id; }); window.scrollTo({ top: 0 }); }
 
 function taskRow(t) {
   const f = FRONTS[t.f] || FRONTS.ev, st = STATUS[t.id] || {}, done = !!st.done, deps = pendingDeps(t), work = canWork(t), late = done && st.delivered_on && st.delivered_on > t.k;
@@ -473,7 +473,50 @@ async function importSeed(force, sync) {
   } catch (e) { st.textContent = ""; err(e); }
 }
 
-function renderAll() { renderVisao(); renderCron(); renderFunil(); renderReguas(); renderTrafego(); renderImersao(); renderNarrativa(); renderDecisoes(); renderPesquisa(); renderRegistro(); renderConfig(); $("#brandName").textContent = DEC.nome || "Família Forte — O Começo"; }
+/* ---------------- kanban por fase ---------------- */
+const KCOLS = [
+  { n: "Preparação", d: "28/09 → 04/10", from: "", to: "2026-10-04", c: "var(--f5)" },
+  { n: "Ato 1 — O espelho", d: "05/10 → 14/10", from: "2026-10-05", to: "2026-10-14", c: "var(--f1)" },
+  { n: "Ato 2 — A descoberta", d: "15/10 → 25/10", from: "2026-10-15", to: "2026-10-25", c: "var(--f3)" },
+  { n: "Ato 3 — O futuro possível", d: "26/10 → 06/11", from: "2026-10-26", to: "2026-11-06", c: "var(--f2)" },
+  { n: "Imersão", d: "07 e 08/11", from: "2026-11-07", to: "2026-11-08", c: "var(--f6)" },
+  { n: "Vendas & fechamento", d: "09/11 → 13/11", from: "2026-11-09", to: "9999-12-31", c: "var(--f4)" }
+];
+function kStatus(t) {
+  const st = STATUS[t.id] || {};
+  if (st.done) return st.delivered_on && st.delivered_on > t.k ? ["Feito com atraso", "late"] : ["Feito", "ok"];
+  if (pendingDeps(t).length) return ["Bloqueada", "lock"];
+  if (t.k < todayKey()) return ["Atrasada", "bad"];
+  if (t.k === todayKey()) return ["Hoje", "now"];
+  return ["A fazer", "todo"];
+}
+let kfilt = lsGet("ff_kfilt") || { f: "all", only: false, mine: false };
+function renderKanban() {
+  const tk = todayKey(), mineOf = t => t.owner_id === ME.id || (!t.owner_id && t.owner_role === ME.role);
+  const list = sortedTasks().filter(t => (kfilt.f === "all" || t.f === kfilt.f) && (!kfilt.only || !isDone(t.id)) && (!kfilt.mine || mineOf(t)));
+  $("#v-kanban").innerHTML = `
+    <h2>Kanban por fase</h2>
+    <p class="lead">As mesmas tarefas do cronograma, agrupadas pela fase do lançamento. Clique num cartão para ver o detalhe, concluir ou editar.</p>
+    <div class="filters"><button data-f="all" aria-pressed="${kfilt.f === "all"}">Todas as frentes</button>${Object.entries(FRONTS).map(([id, f]) => `<button data-f="${id}" aria-pressed="${kfilt.f === id}"><i class="dot" style="background:${f.c}"></i>${f.n}</button>`).join("")}<button data-only="1" aria-pressed="${kfilt.only}">Só pendentes</button>${!isViewer() && !isAdmin() ? `<button data-mine="1" aria-pressed="${kfilt.mine}">Só as minhas</button>` : ""}${isAdmin() ? `<button data-addany="1">+ Nova tarefa</button>` : ""}</div>
+    <div class="kb">${KCOLS.map((c, i) => {
+      const items = list.filter(t => t.k >= c.from && t.k <= c.to), all = sortedTasks().filter(t => t.k >= c.from && t.k <= c.to), pr = progress(all), now = tk >= c.from && tk <= c.to;
+      return `<div class="kcol ${now ? "now" : ""}" style="--c:${c.c}"><header><b>${i + 1}. ${c.n}</b><span class="d">${c.d}${now ? " · agora" : ""}</span><span class="pg">${pr.d}/${pr.n} concluídas</span><div class="bar"><i style="width:${pr.p}%"></i></div></header>
+        <div class="kitems">${items.map(t => { const f = FRONTS[t.f] || FRONTS.ev, [sl, sc] = kStatus(t); return `<button class="kcard ${isDone(t.id) ? "done" : ""}" data-kopen="${t.id}" style="--fc:${f.c}"><span class="kt">${esc(t.t)}</span><span class="kd">${DOW[kd(t.k).getDay()]} · ${fmtK(t.k)}</span><span class="kst ${sc}">${sl}</span><span class="kw">${esc(ownerLabel(t))}</span><span class="kf"><i class="dot" style="background:${f.c}"></i>${f.n}</span></button>`; }).join("") || '<p class="status" style="padding:6px 4px">Nenhuma tarefa.</p>'}</div>
+        ${isAdmin() ? `<button class="sbtn kadd" data-add="${now ? tk : (c.from || "2026-09-28")}">+ Nova tarefa</button>` : ""}</div>`;
+    }).join("")}</div>`;
+  $("#v-kanban .filters").onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.f) kfilt.f = b.dataset.f; else if (b.dataset.only) kfilt.only = !kfilt.only; else if (b.dataset.mine) kfilt.mine = !kfilt.mine;
+    else if (b.dataset.addany) { openTask(null); return; }
+    lsSet("ff_kfilt", kfilt); renderKanban();
+  };
+  $("#v-kanban .kb").onclick = e => {
+    const b = e.target.closest("[data-kopen]"); if (!b || !TASKS[b.dataset.kopen]) return; const t = TASKS[b.dataset.kopen], ph = phaseOfK(t.k);
+    modal(`<h3>${esc(t.t)}</h3><p class="hint">${ph ? ph.n + " · " : ""}previsto para ${DOW[kd(t.k).getDay()]} ${fmtK(t.k)}</p><div class="kmodal">${taskRow(t)}</div><div class="row"><button class="btn ghost" id="kClose">Fechar</button></div>`, () => { $("#kClose").onclick = closeModal; });
+  };
+}
+
+function renderAll() { renderVisao(); renderCron(); renderKanban(); renderFunil(); renderReguas(); renderTrafego(); renderImersao(); renderNarrativa(); renderDecisoes(); renderPesquisa(); renderRegistro(); renderConfig(); $("#brandName").textContent = DEC.nome || "Família Forte — O Começo"; }
 
 /* ---------------- eventos delegados ---------------- */
 document.addEventListener("change", e => {
