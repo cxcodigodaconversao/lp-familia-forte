@@ -181,6 +181,7 @@ function openTask(id, presetK) {
   modal(`<h3>${id ? "Editar tarefa" : "Nova tarefa"}</h3>
     <div class="grid g2"><div class="field"><label for="tk">Data prevista</label><input id="tk" type="date" value="${t.k}"></div><div class="field"><label for="tf">Frente</label><select id="tf">${Object.entries(FRONTS).map(([k, f]) => `<option value="${k}" ${t.f === k ? "selected" : ""}>${f.n}</option>`).join("")}</select></div></div>
     <div class="grid g2"><div class="field"><label for="tor">Papel responsável</label><select id="tor">${Object.entries(ROLES).filter(([k]) => k !== "visualizador").map(([k, n]) => `<option value="${k}" ${t.owner_role === k ? "selected" : ""}>${n}</option>`).join("")}</select></div><div class="field"><label for="toi">Pessoa específica (opcional)</label><select id="toi"><option value="">— qualquer pessoa do papel —</option>${PROFILES.filter(p => p.active && p.role !== "visualizador").map(p => `<option value="${p.id}" ${t.owner_id === p.id ? "selected" : ""}>${esc(p.name)} · ${roleName(p.role)}</option>`).join("")}</select></div></div>
+    ${hasAssignee() ? `<div class="field"><label for="tas">Responsável</label><select id="tas"><option value="">Sem responsável</option>${PEOPLE.map(p => `<option value="${p.k}" ${t.assignee === p.k ? "selected" : ""}>${esc(p.n)}</option>`).join("")}</select></div>` : ""}
     <div class="field"><label for="tt">Tarefa</label><input id="tt" value="${esc(t.t)}"></div>
     <div class="field"><label for="ts">Detalhe</label><textarea id="ts" style="min-height:70px;font-family:var(--body)">${esc(t.s)}</textarea></div>
     <div class="field"><label for="tr">Regra / por quê (dourado)</label><input id="tr" value="${esc(t.r)}"></div>
@@ -190,6 +191,7 @@ function openTask(id, presetK) {
     if (id) $("#tDel").onclick = async () => { if (!confirm("Excluir esta tarefa? Isso apaga também o status dela.")) return; const { error } = await sb.from("tasks").delete().eq("id", id); if (error) return err(error); await log("task_delete", "tarefa", id, t.t, {}); closeModal(); scheduleRefresh(); };
     $("#tSave").onclick = async () => {
       const nt = { id: t.id, k: $("#tk").value || t.k, f: $("#tf").value, t: $("#tt").value.trim(), s: $("#ts").value.trim(), r: $("#tr").value.trim(), owner_role: $("#tor").value, owner_id: $("#toi").value || null, depends_on: Array.from($("#td").selectedOptions).map(o => o.value), updated_at: new Date().toISOString() };
+      if ($("#tas")) nt.assignee = $("#tas").value || null;
       if (!nt.t) return; if (!id) nt.created_by = ME.id;
       const { error } = await sb.from("tasks").upsert(nt); if (error) return err(error);
       const changed = id ? Object.keys(nt).filter(k => k !== "updated_at" && JSON.stringify(nt[k]) !== JSON.stringify(t[k])) : [];
@@ -257,38 +259,61 @@ const VST = [
 ];
 const vStatus = t => isDone(t.id) ? "done" : pendingDeps(t).length ? "blocked" : "todo";
 const vLate = t => !isDone(t.id) && t.k < todayKey();
-const vMine = t => ME && (t.owner_id === ME.id || (!t.owner_id && t.owner_role === ME.role));
+/* responsável (pessoa) — campo tasks.assignee, separado da área (owner_role); ver supabase/responsavel.sql */
+const PEOPLE = [{ k: "everton", n: "Everton Rodrigues" }, { k: "jez", n: "Jezreel Soares (Jez)" }, { k: "viviane", n: "Viviane Dias" }, { k: "paula", n: "Paula Campozandória" }];
+const hasAssignee = () => Object.values(TASKS).some(t => "assignee" in t);
+const assigneeOf = t => "assignee" in t ? (t.assignee || null) : t.owner_role === "gestor_projetos" ? "viviane" : t.owner_role === "expert" ? "paula" : null;
+const personName = k => (PEOPLE.find(p => p.k === k) || {}).n || "Sem responsável";
+const personOf = t => personName(assigneeOf(t));
+function personKeyOf(prof) {
+  const e = String(prof.email || "").toLowerCase(), n = String(prof.name || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return ["everton", "jez", "viviane", "paula"].find(k => e.startsWith(k) || n.startsWith(k)) || null;
+}
+const myKey = () => ME ? personKeyOf(ME) : null;
+const vMine = t => { const k = myKey(), a = assigneeOf(t); return !!ME && ((k && a === k) || (!a && (t.owner_id === ME.id || (!t.owner_id && t.owner_role === ME.role)))); };
 const atoShort = k => { const p = phaseOfK(k); return p ? p.n.split(" — ")[0] : "Fora do calendário"; };
 const daysLate = t => Math.round((kd(todayKey()) - kd(t.k)) / 864e5);
 const lateBadge = t => vLate(t) ? `<span class="pv-pill late">⚠ Atrasada</span>` : "";
-// Cada área responde a uma pessoa: tarefa com pessoa específica usa ela; senão, a(s) pessoa(s) ativa(s) cadastrada(s) com o papel.
-const EXPERT_NAME = "Paula Campozandória";
-function personOf(t) {
-  if (t.owner_id) return profName(t.owner_id);
-  if (t.owner_role === "expert") return EXPERT_NAME;
-  const ps = PROFILES.filter(p => p.active && p.role === t.owner_role).map(p => p.name || p.email);
-  return ps.length ? ps.join(" / ") : roleName(t.owner_role);
-}
 let vf = Object.assign({ ato: "", f: "", resp: "", only: false, hoje: false, mine: false }, lsGet("ff_vf") || {});
 function vFiltered(quick) {
   const tk = todayKey();
-  return sortedTasks().filter(t => (!vf.ato || (phaseOfK(t.k) || {}).id === vf.ato) && (!vf.f || t.f === vf.f) && (!vf.resp || personOf(t) === vf.resp)
+  return sortedTasks().filter(t => (!vf.ato || (phaseOfK(t.k) || {}).id === vf.ato) && (!vf.f || t.f === vf.f) && (!vf.resp || assigneeOf(t) === vf.resp)
     && (!quick || ((!vf.only || !isDone(t.id)) && (!vf.hoje || t.k === tk) && (!vf.mine || vMine(t)))));
 }
 function vBar(quick, extra) {
-  const resps = [...new Set(sortedTasks().map(personOf))].sort((a, b) => a.localeCompare(b));
   const sel = (key, all, opts) => `<select data-vf="${key}" aria-label="${all}"><option value="">${all}</option>${opts.map(([v, n]) => `<option value="${esc(v)}" ${vf[key] === v ? "selected" : ""}>${esc(n)}</option>`).join("")}</select>`;
-  return `<div class="pv-filters">${sel("ato", "Todos os atos", PHASES.map(p => [p.id, p.n]))}${sel("f", "Todas as frentes", Object.entries(FRONTS).map(([k, f]) => [k, f.n]))}${sel("resp", "Todas as pessoas", resps.map(r => [r, r]))}
+  return `<div class="pv-filters">${sel("ato", "Todos os atos", PHASES.map(p => [p.id, p.n]))}${sel("f", "Todas as frentes", Object.entries(FRONTS).map(([k, f]) => [k, f.n]))}${sel("resp", "Todos os responsáveis", PEOPLE.map(p => [p.k, p.n]))}
     ${quick ? `<span class="pv-quick"><button data-vq="only" aria-pressed="${vf.only}">Só pendentes</button><button data-vq="hoje" aria-pressed="${vf.hoje}">Só hoje</button>${ME && !isViewer() ? `<button data-vq="mine" aria-pressed="${vf.mine}">Minhas tarefas</button>` : ""}</span>` : ""}${extra || ""}</div>`;
 }
 document.addEventListener("change", e => { const s = e.target.closest && e.target.closest("select[data-vf]"); if (!s) return; vf[s.dataset.vf] = s.value; lsSet("ff_vf", vf); renderViews(); });
 document.addEventListener("click", e => {
   const q = e.target.closest("button[data-vq]"); if (q) { vf[q.dataset.vq] = !vf[q.dataset.vq]; lsSet("ff_vf", vf); renderViews(); return; }
-  const o = e.target.closest("[data-vopen]"); if (o && TASKS[o.dataset.vopen]) { const t = TASKS[o.dataset.vopen]; modal(`<h3>${esc(t.t)}</h3><p class="hint">${esc(atoShort(t.k))} · prazo ${DOW[kd(t.k).getDay()]} ${fmtK(t.k)} · ${esc(personOf(t))}</p><div class="pv-modal">${taskRow(t)}</div><div class="row"><button class="btn ghost" id="vClose">Fechar</button></div>`, () => { $("#vClose").onclick = closeModal; }); }
+  const o = e.target.closest("[data-vopen]"); if (o && TASKS[o.dataset.vopen]) openView(o.dataset.vopen);
 });
+function openView(id) {
+  const t = TASKS[id], a = assigneeOf(t), mk = myKey(), canAssume = !isViewer() && mk && a !== mk;
+  modal(`<h3>${esc(t.t)}</h3><p class="hint">${esc(atoShort(t.k))} · prazo ${DOW[kd(t.k).getDay()]} ${fmtK(t.k)}</p>
+    <div class="pv-assign"><span class="pv-meta">Responsável</span>${isAdmin() ? `<select id="vAsg" aria-label="Responsável"><option value="">Sem responsável</option>${PEOPLE.map(p => `<option value="${p.k}" ${a === p.k ? "selected" : ""}>${esc(p.n)}</option>`).join("")}</select>` : `<b>${esc(personName(a))}</b>`}${canAssume ? `<button class="sbtn" id="vAssume">Assumir</button>` : ""}<span class="pv-meta">Área: ${esc(roleName(t.owner_role))}</span></div>
+    <div class="pv-modal">${taskRow(t)}</div><div class="row"><button class="btn ghost" id="vClose">Fechar</button></div>`, () => {
+    $("#vClose").onclick = closeModal;
+    const needSql = () => { toast("Ative o campo Responsável rodando supabase/responsavel.sql no Supabase.", true); };
+    const done = async (k, how) => { await log("task_assign", "tarefa", id, t.t, { antes: a, depois: k, como: how }); TASKS[id] = Object.assign({}, TASKS[id], { assignee: k }); renderViews(); openView(id); scheduleRefresh(); toast(k ? `Responsável: ${personName(k)}` : "Sem responsável"); };
+    const sel = $("#vAsg"); if (sel) sel.onchange = async () => { if (!hasAssignee()) { sel.value = a || ""; return needSql(); } const k = sel.value || null; const { error } = await sb.from("tasks").update({ assignee: k, updated_at: new Date().toISOString() }).eq("id", id); if (error) { sel.value = a || ""; return err(error); } done(k, "admin"); };
+    const as = $("#vAssume"); if (as) as.onclick = async () => { if (!hasAssignee()) return needSql(); const { data, error } = await sb.rpc("assume_task", { p_task_id: id }); if (error) return err(error); done(data || mk, "assumir"); };
+  });
+}
 /* tooltip */
-const vTip = document.createElement("div"); vTip.id = "pvTip"; document.body.appendChild(vTip);
-document.addEventListener("mousemove", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (!el) { vTip.style.opacity = 0; return; } vTip.textContent = el.dataset.tip; vTip.style.opacity = 1; vTip.style.left = Math.min(e.clientX + 12, innerWidth - vTip.offsetWidth - 8) + "px"; vTip.style.top = (e.clientY + 14) + "px"; });
+const vTip = document.createElement("div"); vTip.id = "pvTip"; vTip.setAttribute("role", "tooltip"); document.body.appendChild(vTip);
+let vTipEl = null;
+document.addEventListener("mouseover", e => {
+  const el = e.target.closest && e.target.closest("[data-tip]"); if (el === vTipEl) return; vTipEl = el;
+  if (!el) { vTip.classList.remove("on"); return; }
+  vTip.textContent = el.dataset.tip; vTip.classList.add("on");
+  const r = el.getBoundingClientRect(), w = vTip.offsetWidth, h = vTip.offsetHeight, below = r.bottom + 8 + h < innerHeight;
+  vTip.style.left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - 8)) + "px";
+  vTip.style.top = (below ? r.bottom + 8 : Math.max(8, r.top - h - 8)) + "px";
+});
+document.addEventListener("scroll", () => { vTipEl = null; vTip.classList.remove("on"); }, true);
 const vLegend = () => `<div class="pv-legend">${VST.map(s => `<span><i style="background:${s.c}"></i>${s.n}</span>`).join("")}</div>`;
 function vStacked(groups, list, keyFn, max) {
   return groups.map(([g, label]) => {
@@ -302,7 +327,7 @@ function renderVisao() {
   const days = Math.ceil((EVENT - new Date(new Date().setHours(0, 0, 0, 0))) / 864e5); $("#cd").textContent = days >= 0 ? days : 0;
   const L = vFiltered(false), done = L.filter(t => isDone(t.id)).length, late = L.filter(vLate).sort((a, b) => a.k < b.k ? -1 : 1);
   const fronts = Object.entries(FRONTS).map(([k, f]) => [k, f.n]), maxF = Math.max(1, ...fronts.map(([k]) => L.filter(t => t.f === k).length));
-  const people = [...new Set(L.map(personOf))].sort((a, b) => a.localeCompare(b)), tk = todayKey(), wk = kd(tk); wk.setDate(wk.getDate() + 7);
+  const tk = todayKey(), wk = kd(tk); wk.setDate(wk.getDate() + 7);
   const wkKey = `${wk.getFullYear()}-${pad(wk.getMonth() + 1)}-${pad(wk.getDate())}`, blockedWeek = L.filter(t => vStatus(t) === "blocked" && t.k >= tk && t.k <= wkKey).length, ph = phaseOfK(tk);
   $("#v-visao").innerHTML = `
     ${!Object.keys(TASKS).length && isAdmin() ? `<div class="banner"><b>O cronograma ainda está vazio.</b><span class="status">Importe o cronograma padrão em Configurações para começar.</span><button class="btn" id="goConfig">Ir para Configurações</button></div>` : ""}
@@ -316,8 +341,8 @@ function renderVisao() {
     <div class="tl pv-tl">${PHASES.map(p => { const x = progress(L.filter(t => t.k >= p.from && t.k <= p.to)), now = ph && ph.id === p.id; return `<div class="ph ${now ? "now" : ""}" style="--c:${p.c}" data-tip="${esc(p.goal)}">${now ? `<span class="pv-now">Fase atual</span>` : ""}<b>${esc(p.n)}</b><span class="d">${p.d}</span><div class="bar"><i style="width:${x.p}%"></i></div><span class="pg">${x.d}/${x.n} tarefas</span></div>`; }).join("")}</div>
     <div class="pv-grid pv-two">
       <div class="card soft"><h4 class="pv-h">Atrasadas</h4><ul class="pv-late">${late.length ? late.map(t => { const d = daysLate(t); return `<li><button class="pv-link" data-vopen="${t.id}">${esc(t.t)}<span class="pv-meta">${esc(personOf(t))} · ${esc((FRONTS[t.f] || FRONTS.ev).n)} · ${VST.find(s => s.k === vStatus(t)).n}</span></button><span class="pv-pill late">⚠ ${d} ${d === 1 ? "dia" : "dias"}</span></li>`; }).join("") : '<li><span class="pv-meta">Nenhuma demanda atrasada.</span></li>'}</ul></div>
-      <div class="card soft"><h4 class="pv-h">Progresso por pessoa</h4>${vLegend()}${people.map(n => { const it = L.filter(t => personOf(t) === n), d = it.filter(t => isDone(t.id)).length, lt = it.filter(vLate).length;
-        return `<div class="pv-person"><div class="pv-ptop"><b>${esc(n)}</b><span class="pv-meta">${d}/${it.length} concluídas${lt ? ` · <span class="pv-latetxt">${lt} atrasada${lt > 1 ? "s" : ""}</span>` : ""}</span></div><div class="pv-sbar">${VST.map(st => { const c = it.filter(t => vStatus(t) === st.k).length; return c ? `<div class="pv-seg" style="width:${c / it.length * 100}%;background:${st.c}" data-tip="${esc(n)}: ${c} ${st.n.toLowerCase()}"></div>` : ""; }).join("")}</div></div>`; }).join("") || '<p class="pv-meta">Nenhuma demanda no filtro.</p>'}</div>
+      <div class="card soft"><h4 class="pv-h">Progresso por pessoa</h4>${vLegend()}${PEOPLE.map(pp => { const it = L.filter(t => assigneeOf(t) === pp.k), d = it.filter(t => isDone(t.id)).length, lt = it.filter(vLate).length;
+        return `<div class="pv-person"><div class="pv-ptop"><b>${esc(pp.n)}</b><span class="pv-meta">${d}/${it.length} concluídas${lt ? ` · <span class="pv-latetxt">${lt} atrasada${lt > 1 ? "s" : ""}</span>` : ""}</span></div><div class="pv-sbar">${it.length ? VST.map(st => { const c = it.filter(t => vStatus(t) === st.k).length; return c ? `<div class="pv-seg" style="width:${c / it.length * 100}%;background:${st.c}" data-tip="${esc(pp.n)}: ${c} ${st.n.toLowerCase()}"></div>` : ""; }).join("") : '<div class="pv-seg pv-empty" style="width:100%"></div>'}</div></div>`; }).join("")}${(n => n ? `<p class="pv-meta pv-unassigned">${n} ${n === 1 ? "tarefa" : "tarefas"} sem responsável</p>` : "")(L.filter(t => !assigneeOf(t)).length)}</div>
       <div class="card soft pv-wide"><h4 class="pv-h">Status por frente</h4>${vLegend()}${vStacked(fronts, L, t => t.f, maxF)}</div>
     </div>`;
   const g = $("#goConfig"); if (g) g.onclick = () => { cur = "config"; lsSet("ff_tab", cur); renderTabs(); showTab(); };
@@ -369,7 +394,7 @@ function renderLista() {
   $("#v-lista [data-vgo]").onclick = () => { const el = document.getElementById("pv-hoje"); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); else toast("Nenhuma tarefa de hoje em diante neste filtro."); };
 }
 document.addEventListener("click", e => { const b = e.target.closest("button[data-addany]"); if (b && b.closest(".pv-filters")) openTask(null); });
-function renderViews() { if (vf.resp && !sortedTasks().some(t => personOf(t) === vf.resp)) vf.resp = ""; renderVisao(); renderKanban(); renderCron(); renderLista(); }
+function renderViews() { if (vf.resp && !PEOPLE.some(p => p.k === vf.resp)) vf.resp = ""; renderVisao(); renderKanban(); renderCron(); renderLista(); }
 
 function renderFunil() {
   if (!C) { $("#v-funil").innerHTML = emptyC(); return; }
