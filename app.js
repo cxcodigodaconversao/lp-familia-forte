@@ -228,10 +228,10 @@ async function undoTask(id, cb) {
 }
 
 /* ---------------- render ---------------- */
-function TABS() { const t = [["visao", "Visão geral"], ["cronograma", "Cronograma"], ["funil", "Funil & Lives"], ["reguas", "Réguas"], ["trafego", "Tráfego"], ["imersao", "Imersão & Oferta"], ["narrativa", "Narrativa"], ["decisoes", "Decisões"], ["pesquisa", "Pesquisa"], ["registro", "Registro"]]; if (isAdmin()) t.push(["config", "Configurações"]); return t; }
+function TABS() { const t = [["visao", "Visão geral"], ["kanban", "Kanban"], ["cronograma", "Cronograma"], ["lista", "Lista completa"], ["funil", "Funil & Lives"], ["reguas", "Réguas"], ["trafego", "Tráfego"], ["imersao", "Imersão & Oferta"], ["narrativa", "Narrativa"], ["decisoes", "Decisões"], ["pesquisa", "Pesquisa"], ["registro", "Registro"]]; if (isAdmin()) t.push(["config", "Configurações"]); return t; }
 let cur = lsGet("ff_tab") || "visao";
 function renderTabs() { if (!TABS().some(([id]) => id === cur)) cur = "visao"; $("#tabs").innerHTML = TABS().map(([id, n]) => `<button role="tab" aria-selected="${cur === id}" data-t="${id}">${n}</button>`).join(""); $("#tabs").onclick = e => { const b = e.target.closest("button"); if (!b) return; cur = b.dataset.t; lsSet("ff_tab", cur); renderTabs(); showTab(); }; }
-function showTab() { ["visao", "cronograma", "funil", "reguas", "trafego", "imersao", "narrativa", "decisoes", "pesquisa", "registro", "config"].forEach(id => { $("#v-" + id).hidden = cur !== id; }); window.scrollTo({ top: 0 }); }
+function showTab() { ["visao", "kanban", "cronograma", "lista", "funil", "reguas", "trafego", "imersao", "narrativa", "decisoes", "pesquisa", "registro", "config"].forEach(id => { $("#v-" + id).hidden = cur !== id; }); window.scrollTo({ top: 0 }); }
 
 function taskRow(t) {
   const f = FRONTS[t.f] || FRONTS.ev, st = STATUS[t.id] || {}, done = !!st.done, deps = pendingDeps(t), work = canWork(t), late = done && st.delivered_on && st.delivered_on > t.k;
@@ -249,54 +249,117 @@ function taskRow(t) {
     ${isAdmin() ? `<button class="ed" data-edit="${t.id}">✎</button>` : ""}</div>`;
 }
 
+/* ---------------- visão geral · kanban · cronograma · lista (modelo de demandas) ---------------- */
+const VST = [
+  { k: "todo", n: "A fazer", c: "var(--st-todo)" },
+  { k: "blocked", n: "Bloqueada", c: "var(--warn)" },
+  { k: "done", n: "Concluído", c: "var(--gold)" }
+];
+const vStatus = t => isDone(t.id) ? "done" : pendingDeps(t).length ? "blocked" : "todo";
+const vLate = t => !isDone(t.id) && t.k < todayKey();
+const vMine = t => ME && (t.owner_id === ME.id || (!t.owner_id && t.owner_role === ME.role));
+const atoShort = k => { const p = phaseOfK(k); return p ? p.n.split(" — ")[0] : "Fora do calendário"; };
+const daysLate = t => Math.round((kd(todayKey()) - kd(t.k)) / 864e5);
+const lateBadge = t => vLate(t) ? `<span class="pv-pill late">⚠ Atrasada</span>` : "";
+let vf = Object.assign({ ato: "", f: "", resp: "", only: false, hoje: false, mine: false }, lsGet("ff_vf") || {});
+function vFiltered(quick) {
+  const tk = todayKey();
+  return sortedTasks().filter(t => (!vf.ato || (phaseOfK(t.k) || {}).id === vf.ato) && (!vf.f || t.f === vf.f) && (!vf.resp || ownerLabel(t) === vf.resp)
+    && (!quick || ((!vf.only || !isDone(t.id)) && (!vf.hoje || t.k === tk) && (!vf.mine || vMine(t)))));
+}
+function vBar(quick, extra) {
+  const resps = [...new Set(sortedTasks().map(ownerLabel))].sort((a, b) => a.localeCompare(b));
+  const sel = (key, all, opts) => `<select data-vf="${key}" aria-label="${all}"><option value="">${all}</option>${opts.map(([v, n]) => `<option value="${esc(v)}" ${vf[key] === v ? "selected" : ""}>${esc(n)}</option>`).join("")}</select>`;
+  return `<div class="pv-filters">${sel("ato", "Todos os atos", PHASES.map(p => [p.id, p.n]))}${sel("f", "Todas as frentes", Object.entries(FRONTS).map(([k, f]) => [k, f.n]))}${sel("resp", "Todos os responsáveis", resps.map(r => [r, r]))}
+    ${quick ? `<span class="pv-quick"><button data-vq="only" aria-pressed="${vf.only}">Só pendentes</button><button data-vq="hoje" aria-pressed="${vf.hoje}">Só hoje</button>${ME && !isViewer() ? `<button data-vq="mine" aria-pressed="${vf.mine}">Minhas tarefas</button>` : ""}</span>` : ""}${extra || ""}</div>`;
+}
+document.addEventListener("change", e => { const s = e.target.closest && e.target.closest("select[data-vf]"); if (!s) return; vf[s.dataset.vf] = s.value; lsSet("ff_vf", vf); renderViews(); });
+document.addEventListener("click", e => {
+  const q = e.target.closest("button[data-vq]"); if (q) { vf[q.dataset.vq] = !vf[q.dataset.vq]; lsSet("ff_vf", vf); renderViews(); return; }
+  const o = e.target.closest("[data-vopen]"); if (o && TASKS[o.dataset.vopen]) { const t = TASKS[o.dataset.vopen]; modal(`<h3>${esc(t.t)}</h3><p class="hint">${esc(atoShort(t.k))} · prazo ${DOW[kd(t.k).getDay()]} ${fmtK(t.k)}</p><div class="pv-modal">${taskRow(t)}</div><div class="row"><button class="btn ghost" id="vClose">Fechar</button></div>`, () => { $("#vClose").onclick = closeModal; }); }
+});
+/* tooltip */
+const vTip = document.createElement("div"); vTip.id = "pvTip"; document.body.appendChild(vTip);
+document.addEventListener("mousemove", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (!el) { vTip.style.opacity = 0; return; } vTip.textContent = el.dataset.tip; vTip.style.opacity = 1; vTip.style.left = Math.min(e.clientX + 12, innerWidth - vTip.offsetWidth - 8) + "px"; vTip.style.top = (e.clientY + 14) + "px"; });
+const vLegend = () => `<div class="pv-legend">${VST.map(s => `<span><i style="background:${s.c}"></i>${s.n}</span>`).join("")}</div>`;
+function vStacked(groups, list, keyFn, max) {
+  return groups.map(([g, label]) => {
+    const items = list.filter(t => keyFn(t) === g); if (!items.length) return "";
+    const segs = VST.map(s => { const n = items.filter(t => vStatus(t) === s.k).length; return n ? `<div class="pv-seg" style="width:${n / max * 100}%;background:${s.c}" data-tip="${esc(label)}: ${n} ${s.n.toLowerCase()}"></div>` : ""; }).join("");
+    return `<div class="pv-row"><div class="n" title="${esc(label)}">${esc(label)}</div><div class="pv-sbar">${segs}</div><div class="v">${items.length}</div></div>`;
+  }).join("");
+}
+
 function renderVisao() {
-  const all = Object.values(TASKS), pr = progress(all), tk = todayKey();
   const days = Math.ceil((EVENT - new Date(new Date().setHours(0, 0, 0, 0))) / 864e5); $("#cd").textContent = days >= 0 ? days : 0;
-  const ph = phaseOfK(tk); const late = sortedTasks().filter(t => t.k < tk && !isDone(t.id)); const todays = sortedTasks().filter(t => t.k === tk);
-  const mine = sortedTasks().filter(t => !isDone(t.id) && !isAdmin() && (t.owner_id === ME.id || (!t.owner_id && t.owner_role === ME.role)));
-  const blockedMine = mine.filter(t => pendingDeps(t).length);
+  const L = vFiltered(false), done = L.filter(t => isDone(t.id)).length, late = L.filter(vLate).sort((a, b) => a.k < b.k ? -1 : 1);
+  const fronts = Object.entries(FRONTS).map(([k, f]) => [k, f.n]), maxF = Math.max(1, ...fronts.map(([k]) => L.filter(t => t.f === k).length));
+  const resps = [...new Set(L.map(ownerLabel))].sort((a, b) => a.localeCompare(b)).map(r => [r, r]), maxR = Math.max(1, ...resps.map(([r]) => L.filter(t => ownerLabel(t) === r).length));
   $("#v-visao").innerHTML = `
-    <h2>Uma família forte não acontece por acaso.</h2>
-    <p class="lead">Preparação (28/09 → 04/10) → aquecimento (05/10 → 06/11) → imersão online paga (07 e 08/11) → Família Forte 2.0 vitalício na Black Friday antecipada.</p>
-    ${!all.length && isAdmin() ? `<div class="banner"><b>O cronograma ainda está vazio.</b><span class="status">Importe o cronograma padrão em Configurações para começar.</span><button class="btn" id="goConfig">Ir para Configurações</button></div>` : ""}
-    <div class="grid g4 mt">
-      <div class="card kpi"><div class="v">${pr.p}%</div><div class="k">${pr.d} de ${pr.n} tarefas concluídas</div></div>
-      <div class="card kpi"><div class="v">${ph ? ph.n.split(" — ")[0] : "—"}</div><div class="k">Fase atual · ${ph ? ph.d : "fora do calendário"}</div></div>
-      <div class="card kpi"><div class="v" style="color:${late.length ? "var(--bad)" : "var(--ok)"}">${late.length}</div><div class="k">Tarefas atrasadas</div></div>
-      <div class="card kpi"><div class="v">${todays.length}</div><div class="k">Tarefas de hoje (${fmtK(tk)})</div></div>
+    ${!Object.keys(TASKS).length && isAdmin() ? `<div class="banner"><b>O cronograma ainda está vazio.</b><span class="status">Importe o cronograma padrão em Configurações para começar.</span><button class="btn" id="goConfig">Ir para Configurações</button></div>` : ""}
+    ${vBar(false)}
+    <div class="pv-grid pv-kpis">
+      <div class="card soft pv-kpi"><div class="lbl">Demandas</div><div class="val">${L.length}</div><div class="note">no filtro atual</div></div>
+      <div class="card soft pv-kpi"><div class="lbl">Concluídas</div><div class="val">${L.length ? Math.round(done / L.length * 100) : 0}%</div><div class="note">${done} de ${L.length}</div></div>
+      <div class="card soft pv-kpi"><div class="lbl">Bloqueadas</div><div class="val">${L.filter(t => vStatus(t) === "blocked").length}</div><div class="note">aguardando outra entrega</div></div>
+      <div class="card soft pv-kpi late"><div class="lbl">Atrasadas</div><div class="val">${late.length}</div><div class="note">prazo vencido sem conclusão</div></div>
     </div>
-    ${!isAdmin() && !isViewer() ? `<div class="card mt2 soft"><span class="eyebrow">Suas próximas tarefas (${roleName(ME.role)})</span>${mine.length ? mine.slice(0, 8).map(taskRow).join("") : '<p class="status" style="margin-top:8px">Nada pendente para você.</p>'}${blockedMine.length ? `<p class="status" style="padding:10px 16px">${blockedMine.length} delas estão bloqueadas aguardando outra pessoa.</p>` : ""}</div>` : ""}
-    <div class="mt2"><span class="eyebrow">Linha do tempo</span>
-      <div class="tl">${PHASES.map(p => { const x = progress(all.filter(t => t.k >= p.from && t.k <= p.to)); return `<div class="ph ${ph && ph.id === p.id ? "now" : ""}" style="--c:${p.c}"><b>${p.n}</b><span class="d">${p.d}</span><p>${p.goal}</p><span class="pg">${x.d}/${x.n} · ${x.p}%</span><div class="bar"><i style="width:${x.p}%"></i></div></div>`; }).join("")}</div>
-    </div>
-    <div class="grid g2 mt2">
-      <div class="card soft"><span class="eyebrow">Progresso por frente</span>${Object.entries(FRONTS).map(([id, f]) => { const x = progress(all.filter(t => t.f === id)); return `<div style="margin-top:12px"><div class="row" style="justify-content:space-between"><span class="chip"><i class="dot" style="background:${f.c}"></i>${f.n}</span><span class="status">${x.d}/${x.n}</span></div><div class="bar" style="margin-top:6px"><i style="width:${x.p}%;background:${f.c}"></i></div></div>`; }).join("")}</div>
-      <div class="card soft"><span class="eyebrow">Progresso por pessoa</span>${PROFILES.filter(p => p.active && p.role !== "visualizador").map(p => { const list = all.filter(t => t.owner_id === p.id || (!t.owner_id && t.owner_role === p.role)); const x = progress(list); const l8 = list.filter(t => t.k < tk && !isDone(t.id)).length; return `<div style="margin-top:12px"><div class="row" style="justify-content:space-between"><span><b>${esc(p.name)}</b> <span class="status">· ${roleName(p.role)}</span></span><span class="status">${x.d}/${x.n}${l8 ? ` · <span style="color:var(--bad)">${l8} atrasada(s)</span>` : ""}</span></div><div class="bar" style="margin-top:6px"><i style="width:${x.p}%"></i></div></div>`; }).join("") || '<p class="status" style="margin-top:8px">Cadastre a equipe em Configurações.</p>'}</div>
-    </div>
-    ${late.length ? `<div class="card mt2" style="border-color:var(--bad)"><span class="eyebrow" style="color:var(--bad)">Atrasadas</span>${late.slice(0, 8).map(taskRow).join("")}${late.length > 8 ? `<p class="status" style="padding:10px 16px">+ ${late.length - 8} no cronograma</p>` : ""}</div>` : ""}
-    <div class="card mt2 soft"><span class="eyebrow">Hoje · ${DOW[kd(tk).getDay()]} ${fmtK(tk)}</span>${todays.length ? todays.map(taskRow).join("") : '<p class="status" style="margin-top:8px">Nada marcado para hoje.</p>'}${isAdmin() ? `<div class="addrow"><button class="sbtn" data-add="${tk}">+ tarefa para hoje</button></div>` : ""}</div>`;
+    <div class="pv-grid pv-two">
+      <div class="card soft"><h4 class="pv-h">Progresso por ato</h4>${PHASES.map(p => { const it = L.filter(t => t.k >= p.from && t.k <= p.to); if (!it.length) return ""; const pc = Math.round(it.filter(t => isDone(t.id)).length / it.length * 100); return `<div class="pv-row"><div class="n" title="${esc(p.n)}">${esc(p.n)}</div><div class="pv-track" data-tip="${esc(p.n)}: ${pc}% concluído (${it.length} demandas)"><div class="pv-fill" style="width:${pc}%"></div></div><div class="v">${pc}%</div></div>`; }).join("") || '<p class="pv-meta">Nenhuma demanda no filtro.</p>'}</div>
+      <div class="card soft"><h4 class="pv-h">Atrasadas</h4><ul class="pv-late">${late.length ? late.map(t => { const d = daysLate(t); return `<li><button class="pv-link" data-vopen="${t.id}">${esc(t.t)}<span class="pv-meta">${esc(ownerLabel(t))} · ${esc((FRONTS[t.f] || FRONTS.ev).n)} · ${VST.find(s => s.k === vStatus(t)).n}</span></button><span class="pv-pill late">⚠ ${d} ${d === 1 ? "dia" : "dias"}</span></li>`; }).join("") : '<li><span class="pv-meta">Nenhuma demanda atrasada.</span></li>'}</ul></div>
+      <div class="card soft"><h4 class="pv-h">Status por frente</h4>${vLegend()}${vStacked(fronts, L, t => t.f, maxF)}</div>
+      <div class="card soft"><h4 class="pv-h">Carga por responsável</h4>${vLegend()}${vStacked(resps, L, ownerLabel, maxR)}</div>
+    </div>`;
   const g = $("#goConfig"); if (g) g.onclick = () => { cur = "config"; lsSet("ff_tab", cur); renderTabs(); showTab(); };
 }
 
-let filt = lsGet("ff_filt") || { f: "all", only: false, mine: false };
-function renderCron() {
-  const tk = todayKey();
-  const list = sortedTasks().filter(t => (filt.f === "all" || t.f === filt.f) && (!filt.only || !isDone(t.id)) && (!filt.mine || t.owner_id === ME.id || (!t.owner_id && t.owner_role === ME.role)));
-  const byDay = {}; list.forEach(t => { (byDay[t.k] = byDay[t.k] || []).push(t); }); if (C) Object.keys(C.marks || {}).forEach(k => { if (!byDay[k] && filt.f === "all" && !filt.only && !filt.mine) byDay[k] = []; });
-  const keys = Object.keys(byDay).sort();
-  $("#v-cronograma").innerHTML = `
-    <h2>Cronograma dia a dia</h2>
-    <p class="lead">De 28/09 a 13/11. Cada tarefa tem um responsável e pode depender de outras: enquanto a etapa anterior não é entregue, a próxima fica bloqueada. Ao concluir, registre o que foi feito; se entregar depois da data, a justificativa é obrigatória.</p>
-    <div class="filters"><button data-f="all" aria-pressed="${filt.f === "all"}">Todas as frentes</button>${Object.entries(FRONTS).map(([id, f]) => `<button data-f="${id}" aria-pressed="${filt.f === id}"><i class="dot" style="background:${f.c}"></i>${f.n}</button>`).join("")}<button data-only="1" aria-pressed="${filt.only}">Só pendentes</button>${!isViewer() && !isAdmin() ? `<button data-mine="1" aria-pressed="${filt.mine}">Só as minhas</button>` : ""}<button data-go="today">Ir para hoje</button>${isAdmin() ? `<button data-addany="1">+ Nova tarefa</button><button data-sec="marks">✎ Marcos</button>` : ""}</div>
-    ${keys.map(k => { const d = kd(k), ph = phaseOfK(k), pr = progress(byDay[k]); return `<div class="day ${k === tk ? "today" : ""}" id="d-${k}"><header><b>${DOW[d.getDay()]} · ${fmtK(k)}</b>${ph ? `<span class="ph-tag" style="color:${ph.c}">${ph.n}</span>` : ""}${C && C.marks && C.marks[k] ? `<span class="mark">★ ${esc(C.marks[k])}</span>` : ""}<span class="pg">${pr.d}/${pr.n}</span></header>${byDay[k].map(taskRow).join("")}${isAdmin() ? `<div class="addrow"><button class="sbtn" data-add="${k}">+ tarefa em ${fmtK(k)}</button></div>` : ""}</div>`; }).join("") || '<p class="status mt">Nenhuma tarefa.</p>'}`;
-  $("#v-cronograma .filters").onclick = e => {
-    const b = e.target.closest("button"); if (!b) return;
-    if (b.dataset.f) filt.f = b.dataset.f; else if (b.dataset.only) filt.only = !filt.only; else if (b.dataset.mine) filt.mine = !filt.mine;
-    else if (b.dataset.go) { const el = document.getElementById("d-" + tk) || document.querySelector(".day"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
-    else if (b.dataset.addany) { openTask(null); return; } else if (b.dataset.sec) { openSec(b.dataset.sec); return; }
-    lsSet("ff_filt", filt); renderCron();
-  };
+function vCard(t) {
+  const f = FRONTS[t.f] || FRONTS.ev, deps = isDone(t.id) ? [] : pendingDeps(t);
+  return `<button class="pv-card ${vLate(t) ? "is-late" : ""}" data-vopen="${t.id}"><span class="t">${esc(t.t)}</span><span class="pv-meta">${esc(ownerLabel(t))} · prazo ${fmtK(t.k)}</span>
+    <span class="pv-tags"><span class="pv-tag">${esc(atoShort(t.k))}</span><span class="pv-tag"><i class="dot" style="background:${f.c}"></i>${esc(f.n)}</span>${lateBadge(t)}</span>
+    ${deps.length ? `<span class="pv-meta">Depende de: ${esc(TASKS[deps[0]].t)}${deps.length > 1 ? ` (+${deps.length - 1})` : ""}</span>` : ""}</button>`;
 }
+function renderKanban() {
+  const L = vFiltered(true);
+  $("#v-kanban").innerHTML = `${vBar(true, isAdmin() ? `<button class="sbtn" data-addany="1">+ Nova tarefa</button>` : "")}
+    <div class="pv-kanban">${VST.map(s => { const it = L.filter(t => vStatus(t) === s.k); return `<div class="pv-col"><h4><span><i class="dot" style="background:${s.c}"></i>${s.n}</span><span>${it.length}</span></h4>${it.map(vCard).join("") || '<p class="pv-meta" style="padding:4px">Nenhuma demanda.</p>'}</div>`; }).join("")}</div>`;
+}
+
+let vAto = null;
+function renderCron() {
+  const s = kd(PHASES[0].from), e = kd(PHASES[PHASES.length - 1].to), span = e - s, pos = d => Math.max(0, Math.min(100, (d - s) / span * 100)), tk = todayKey();
+  const ticks = []; for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 7)) ticks.push(new Date(d));
+  const L = vFiltered(false), marks = (C && C.marks) || {};
+  const sel = PHASES.find(p => p.id === vAto);
+  $("#v-cronograma").innerHTML = `${vBar(false, isAdmin() ? `<button class="sbtn" data-sec="marks">✎ Marcos</button>` : "")}
+    <div class="card soft"><h4 class="pv-h">Linha do tempo dos atos</h4>
+      <div class="pv-legend"><span><i style="background:var(--st-todo)"></i>Ato encerrado</span><span><i style="background:var(--gold)"></i>Ato atual ou futuro</span><span><i style="background:var(--warn);transform:rotate(45deg)"></i>Marco</span><span><i style="background:var(--bad);width:2px"></i>Hoje</span><span class="pv-meta">Clique num ato para ver o objetivo dele.</span></div>
+      <div class="pv-gwrap"><div class="pv-gantt">
+        <div class="pv-gscale">${ticks.map(d => `<span style="left:${pos(d)}%">${pad(d.getDate())}/${pad(d.getMonth() + 1)}</span>`).join("")}</div>
+        <div class="pv-gtoday-wrap"><div class="pv-gtoday" style="left:${pos(kd(tk))}%"><b>Hoje ${fmtK(tk)}</b></div></div>
+        ${PHASES.map(p => { const a = kd(p.from), b = kd(p.to); b.setDate(b.getDate() + 1); const n = L.filter(t => t.k >= p.from && t.k <= p.to).length;
+          const ms = Object.entries(marks).filter(([k]) => k >= p.from && k <= p.to).map(([k, m]) => `<div class="pv-mile" style="left:${pos(kd(k)) + (12 * 60 * 60 * 1000) / span * 100}%" data-tip="${fmtK(k)} · ${esc(m)}"></div>`).join("");
+          return `<div class="pv-grow ${vAto === p.id ? "on" : ""}"><button class="n" data-vato="${p.id}">${esc(p.n)}</button><div class="pv-glane"><button class="pv-gbar ${p.to < tk ? "done" : ""}" data-vato="${p.id}" style="left:${pos(a)}%;width:${pos(b) - pos(a)}%" data-tip="${esc(p.n)}: ${p.d} · ${n} demandas — ${esc(p.goal)}" aria-label="${esc(p.n)}"></button>${ms}</div></div>`; }).join("")}
+      </div></div>
+      ${sel ? `<div class="pv-goal"><b>${esc(sel.n)}</b> <span class="pv-meta">${sel.d}</span><p>${esc(sel.goal)}</p>${Object.entries(marks).filter(([k]) => k >= sel.from && k <= sel.to).length ? `<ul>${Object.entries(marks).filter(([k]) => k >= sel.from && k <= sel.to).sort().map(([k, m]) => `<li><b>${fmtK(k)}</b> · ${esc(m)}</li>`).join("")}</ul>` : ""}</div>` : ""}
+    </div>`;
+  $("#v-cronograma .pv-gantt").onclick = ev => { const b = ev.target.closest("[data-vato]"); if (!b) return; vAto = vAto === b.dataset.vato ? null : b.dataset.vato; renderCron(); };
+}
+
+function renderLista() {
+  const L = vFiltered(true), tk = todayKey(); let anchored = false;
+  $("#v-lista").innerHTML = `${vBar(true, `<button class="sbtn" data-vgo="1">Ir para hoje</button>${isAdmin() ? `<button class="sbtn" data-addany="1">+ Nova tarefa</button>` : ""}`)}
+    <div class="tw pv-table"><table><thead><tr><th></th><th>Demanda</th><th>Ato</th><th>Frente</th><th>Responsável</th><th>Prazo</th><th>Status</th><th>Depende de</th>${isAdmin() ? "<th></th>" : ""}</tr></thead><tbody>${L.map(t => {
+      const f = FRONTS[t.f] || FRONTS.ev, s = VST.find(x => x.k === vStatus(t)), anchor = !anchored && t.k >= tk; if (anchor) anchored = true;
+      const deps = (t.depends_on || []).filter(d => TASKS[d]);
+      return `<tr ${anchor ? 'id="pv-hoje"' : ""} class="${t.k === tk ? "is-today" : ""}"><td><input type="checkbox" data-id="${t.id}" ${isDone(t.id) ? "checked" : ""} ${canWork(t) ? "" : "disabled"} aria-label="Concluir"></td>
+        <td><button class="pv-link" data-vopen="${t.id}">${esc(t.t)}</button></td><td class="pv-nw">${esc(atoShort(t.k))}</td><td class="pv-nw"><i class="dot" style="background:${f.c}"></i> ${esc(f.n)}</td><td>${esc(ownerLabel(t))}</td>
+        <td class="pv-nw">${fmtK(t.k)} ${lateBadge(t)}</td><td class="pv-nw"><i class="dot" style="background:${s.c}"></i> ${s.n}</td><td class="pv-meta pv-deps"><span title="${deps.map(d => esc(TASKS[d].t)).join(" · ")}">${deps.map(d => esc(TASKS[d].t)).join(" · ")}</span></td>${isAdmin() ? `<td><button class="ed" data-edit="${t.id}">✎</button></td>` : ""}</tr>`;
+    }).join("") || `<tr><td colspan="9" class="pv-meta">Nenhuma demanda no filtro.</td></tr>`}</tbody></table></div>`;
+  $("#v-lista [data-vgo]").onclick = () => { const el = document.getElementById("pv-hoje"); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); else toast("Nenhuma tarefa de hoje em diante neste filtro."); };
+}
+document.addEventListener("click", e => { const b = e.target.closest("button[data-addany]"); if (b && b.closest(".pv-filters")) openTask(null); });
+function renderViews() { renderVisao(); renderKanban(); renderCron(); renderLista(); }
 
 function renderFunil() {
   if (!C) { $("#v-funil").innerHTML = emptyC(); return; }
@@ -473,7 +536,7 @@ async function importSeed(force, sync) {
   } catch (e) { st.textContent = ""; err(e); }
 }
 
-function renderAll() { renderVisao(); renderCron(); renderFunil(); renderReguas(); renderTrafego(); renderImersao(); renderNarrativa(); renderDecisoes(); renderPesquisa(); renderRegistro(); renderConfig(); $("#brandName").textContent = DEC.nome || "Família Forte — O Começo"; }
+function renderAll() { renderViews(); renderFunil(); renderReguas(); renderTrafego(); renderImersao(); renderNarrativa(); renderDecisoes(); renderPesquisa(); renderRegistro(); renderConfig(); $("#brandName").textContent = DEC.nome || "Família Forte — O Começo"; }
 
 /* ---------------- eventos delegados ---------------- */
 document.addEventListener("change", e => {
