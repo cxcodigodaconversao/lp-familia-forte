@@ -290,16 +290,31 @@ document.addEventListener("click", e => {
   const q = e.target.closest("button[data-vq]"); if (q) { vf[q.dataset.vq] = !vf[q.dataset.vq]; lsSet("ff_vf", vf); renderViews(); return; }
   const o = e.target.closest("[data-vopen]"); if (o && TASKS[o.dataset.vopen]) openView(o.dataset.vopen);
 });
+async function afterAssign(id, a, k, how) {
+  await log("task_assign", "tarefa", id, TASKS[id].t, { antes: a, depois: k, como: how });
+  TASKS[id] = Object.assign({}, TASKS[id], { assignee: k }); renderViews(); scheduleRefresh(); toast(k ? `Responsável: ${personName(k)}` : "Sem responsável");
+}
+async function setAssignee(id, k) {
+  if (!hasAssignee()) { toast("Ative o campo Responsável rodando supabase/responsavel.sql no Supabase.", true); return false; }
+  const a = assigneeOf(TASKS[id]); if (a === k) return true;
+  const { error } = await sb.from("tasks").update({ assignee: k, updated_at: new Date().toISOString() }).eq("id", id); if (error) { err(error); return false; }
+  await afterAssign(id, a, k, "admin"); return true;
+}
+async function assumeTask(id) {
+  if (!hasAssignee()) { toast("Ative o campo Responsável rodando supabase/responsavel.sql no Supabase.", true); return false; }
+  const a = assigneeOf(TASKS[id]); const { data, error } = await sb.rpc("assume_task", { p_task_id: id }); if (error) { err(error); return false; }
+  await afterAssign(id, a, data || myKey(), "assumir"); return true;
+}
+document.addEventListener("change", async e => { const s = e.target.closest && e.target.closest("select[data-asg]"); if (!s) return; const id = s.dataset.asg; if (!(await setAssignee(id, s.value || null))) s.value = assigneeOf(TASKS[id]) || ""; });
+document.addEventListener("click", e => { const b = e.target.closest("button[data-assume]"); if (b) assumeTask(b.dataset.assume); });
 function openView(id) {
   const t = TASKS[id], a = assigneeOf(t), mk = myKey(), canAssume = !isViewer() && mk && a !== mk;
   modal(`<h3>${esc(t.t)}</h3><p class="hint">${esc(atoShort(t.k))} · prazo ${DOW[kd(t.k).getDay()]} ${fmtK(t.k)}</p>
     <div class="pv-assign"><span class="pv-meta">Responsável</span>${isAdmin() ? `<select id="vAsg" aria-label="Responsável"><option value="">Sem responsável</option>${PEOPLE.map(p => `<option value="${p.k}" ${a === p.k ? "selected" : ""}>${esc(p.n)}</option>`).join("")}</select>` : `<b>${esc(personName(a))}</b>`}${canAssume ? `<button class="sbtn" id="vAssume">Assumir</button>` : ""}<span class="pv-meta">Área: ${esc(roleName(t.owner_role))}</span></div>
     <div class="pv-modal">${taskRow(t)}</div><div class="row"><button class="btn ghost" id="vClose">Fechar</button></div>`, () => {
     $("#vClose").onclick = closeModal;
-    const needSql = () => { toast("Ative o campo Responsável rodando supabase/responsavel.sql no Supabase.", true); };
-    const done = async (k, how) => { await log("task_assign", "tarefa", id, t.t, { antes: a, depois: k, como: how }); TASKS[id] = Object.assign({}, TASKS[id], { assignee: k }); renderViews(); openView(id); scheduleRefresh(); toast(k ? `Responsável: ${personName(k)}` : "Sem responsável"); };
-    const sel = $("#vAsg"); if (sel) sel.onchange = async () => { if (!hasAssignee()) { sel.value = a || ""; return needSql(); } const k = sel.value || null; const { error } = await sb.from("tasks").update({ assignee: k, updated_at: new Date().toISOString() }).eq("id", id); if (error) { sel.value = a || ""; return err(error); } done(k, "admin"); };
-    const as = $("#vAssume"); if (as) as.onclick = async () => { if (!hasAssignee()) return needSql(); const { data, error } = await sb.rpc("assume_task", { p_task_id: id }); if (error) return err(error); done(data || mk, "assumir"); };
+    const sel = $("#vAsg"); if (sel) sel.onchange = async () => { if (await setAssignee(id, sel.value || null)) openView(id); else sel.value = a || ""; };
+    const as = $("#vAssume"); if (as) as.onclick = async () => { if (await assumeTask(id)) openView(id); };
   });
 }
 /* tooltip */
@@ -388,7 +403,7 @@ function renderLista() {
       const f = FRONTS[t.f] || FRONTS.ev, s = VST.find(x => x.k === vStatus(t)), anchor = !anchored && t.k >= tk; if (anchor) anchored = true;
       const deps = (t.depends_on || []).filter(d => TASKS[d]);
       return `<tr ${anchor ? 'id="pv-hoje"' : ""} class="${t.k === tk ? "is-today" : ""}"><td><input type="checkbox" data-id="${t.id}" ${isDone(t.id) ? "checked" : ""} ${canWork(t) ? "" : "disabled"} aria-label="Concluir"></td>
-        <td><button class="pv-link" data-vopen="${t.id}">${esc(t.t)}</button></td><td class="pv-nw">${esc(atoShort(t.k))}</td><td class="pv-nw"><i class="dot" style="background:${f.c}"></i> ${esc(f.n)}</td><td>${esc(personOf(t))}</td>
+        <td><button class="pv-link" data-vopen="${t.id}">${esc(t.t)}</button></td><td class="pv-nw">${esc(atoShort(t.k))}</td><td class="pv-nw"><i class="dot" style="background:${f.c}"></i> ${esc(f.n)}</td><td>${isAdmin() ? `<select class="pv-asg" data-asg="${t.id}" aria-label="Responsável de ${esc(t.t)}"><option value="">Sem responsável</option>${PEOPLE.map(p => `<option value="${p.k}" ${assigneeOf(t) === p.k ? "selected" : ""}>${esc(p.n)}</option>`).join("")}</select>` : `${esc(personOf(t))}${!isViewer() && myKey() && assigneeOf(t) !== myKey() ? ` <button class="pv-assume" data-assume="${t.id}">Assumir</button>` : ""}`}</td>
         <td class="pv-nw">${fmtK(t.k)} ${lateBadge(t)}</td><td class="pv-nw"><i class="dot" style="background:${s.c}"></i> ${s.n}</td><td class="pv-meta pv-deps"><span title="${deps.map(d => esc(TASKS[d].t)).join(" · ")}">${deps.map(d => esc(TASKS[d].t)).join(" · ")}</span></td>${isAdmin() ? `<td><button class="ed" data-edit="${t.id}">✎</button></td>` : ""}</tr>`;
     }).join("") || `<tr><td colspan="9" class="pv-meta">Nenhuma demanda no filtro.</td></tr>`}</tbody></table></div>`;
   $("#v-lista [data-vgo]").onclick = () => { const el = document.getElementById("pv-hoje"); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); else toast("Nenhuma tarefa de hoje em diante neste filtro."); };
