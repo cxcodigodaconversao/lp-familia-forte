@@ -129,22 +129,22 @@ Pronto. Cada pessoa entra com o próprio login, vê o próprio nome no cabeçalh
 Cada tarefa pode **depender** de outras. Enquanto a anterior não é concluída, a seguinte aparece **bloqueada** (🔒) com o nome de quem está travando. O banco também recusa a conclusão — não é só visual. O cronograma padrão já vem com as cadeias principais:
 
 - copy da semana (sexta anterior) → posts com CTA, lives, e-mail e WhatsApp da semana → conferência do ManyChat → distribuição paga na segunda seguinte
-- oferta do ingresso → copy da página A (sem VSL) → página A publicada → pixel → campanhas → captação (05/10)
-- roteiro da VSL → expert grava a VSL → página B (com VSL) publicada → teste A/B (05→11/10) → decisão da vencedora (12/10)
+- oferta do ingresso → copy da página A (sem VSL) → página A publicada → pixel → campanhas → captação (11/10)
+- roteiro da VSL → expert grava a VSL → página B (com VSL) publicada → teste A/B (11→17/10) → decisão da vencedora (18/10)
 - palavra-chave → copies do ManyChat → fluxos → teste ponta a ponta → checklist final
 - copies dos criativos → expert grava → tráfego troca os criativos (a cada ato; o preço só muda nas viradas de lote)
-- copies das viradas de lote → avisos (29/10 · 03/11) → virada do checkout + páginas + ManyChat + anúncios (01/11 · 06/11) → última chamada (07/11) → fechamento
-- roteiro Dia 1 → Dia 2 → pitch → expert valida → e-mails de lançamento / templates do evento → ensaio → imersão
+- copies das viradas de lote → aviso (28/10) → último dia do Lote 1 (31/10) → virada do checkout + páginas + ManyChat + anúncios (01/11) → última chamada e fechamento das vendas (02/11)
+- roteiro das noites 1–3 → noites 4–5 → pitch → roteiro do encerramento → expert valida → e-mails de lançamento / templates do evento → ensaio → 5 noites (02→06/11, 20h–22h) → encerramento com oferta (07/11, 8h–12h)
 - copy da semana → arco de stories da semana (inimigo → cena da dor → virada → bastidor → convite)
 
 ## Lotes × atos (regra fixa)
 
 | | Datas |
 |---|---|
-| Ato 1 · 2 · 3 (narrativa) | 05→14/10 · 15→25/10 · 26/10→06/11 — **não mudam** |
-| Lote 1 (R$ 27,90) | 05/10 → 31/10 |
-| Lote 2 | **01/11** → 05/11 (não vira antes) |
-| Lote 3 | **06 e 07/11 apenas** |
+| Ato 1 · 2 · 3 (narrativa) | 11→17/10 · 18→24/10 · 25/10→01/11 |
+| Lote 1 (R$ 27,90) | 11/10 → 31/10 |
+| Lote 2 | **01 e 02/11 apenas** (não vira antes) · vendas encerram 02/11 |
+| Imersão | 5 noites 02→06/11 (20h–22h) + encerramento 07/11 (8h–12h) com abertura da oferta FF 2.0 |
 
 Duas páginas de venda (A sem VSL · B com VSL) com o mesmo checkout. A base de conteúdo da Paula no Instagram não muda: todo post ganha a CTA da palavra-chave (ManyChat → link do ingresso) e entram lives chamando para o evento.
 
