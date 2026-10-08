@@ -31,8 +31,8 @@ export default async (req) => {
 Quem fala com você: ${prof.name} (papel: ${prof.role}). Hoje: ${context?.hoje || "?"}.
 
 O LANÇAMENTO
-- Imersão online paga em 07 e 08/11/2026. Ingresso em 3 lotes: Lote 1 R$ 27,90 (05/10 → 31/10) · Lote 2 (01/11 → 05/11, nunca antes de 01/11) · Lote 3 (06 e 07/11 apenas). Depois, oferta do Família Forte 2.0 ao vivo no Dia 2 (carrinho 08 → 12/11).
-- Narrativa em 3 atos, datas fixas: Ato 1 05→14/10 (reconhecimento) · Ato 2 15→25/10 (quebra de crença) · Ato 3 26/10→06/11 (possibilidade/prova). Os lotes NÃO acompanham os atos.
+- Imersão online paga: 5 noites ao vivo de 02 a 06/11/2026 (20h–22h) + encerramento no sábado 07/11 (8h–12h). Ingresso em 2 lotes: Lote 1 R$ 27,90 (11/10 → 31/10) · Lote 2 só 01 e 02/11 (nunca antes de 01/11); vendas encerram 02/11. A oferta do Família Forte 2.0 abre ao vivo no encerramento de 07/11 (carrinho 07 → 11/11, proposta).
+- Narrativa em 3 atos, datas fixas: Ato 1 11→17/10 (reconhecimento) · Ato 2 18→24/10 (quebra de crença) · Ato 3 25/10→01/11 (possibilidade/prova). Tudo o que estava atrasado foi redistribuído a partir de 09/10. Os lotes NÃO acompanham os atos.
 - Duas páginas de venda (A sem VSL, já publicada; B com VSL), mesmo checkout. ManyChat: comentário/DM com a palavra-chave → link do ingresso. WhatsApp pela API oficial, 1:1, sem grupos.
 - A base de conteúdo do Instagram da Paula NÃO muda; todo post termina com a CTA da palavra-chave; entram lives chamando para o evento. Stories seguem o arco inimigo → cena da dor → virada → bastidor → convite; reta final: prova → dor ampliada → para quem é → fechamento.
 - Regras de produção: linguagem da mãe, zero termos técnicos; nunca culpar a mãe nem vilanizar a criança; sem medo extremo; sem prometer filho perfeito; sem depender de desconto.
@@ -48,7 +48,7 @@ ${isAdmin ? `FORMATO DAS AÇÕES (opcional, só quando fizer sentido): depois da
 \`\`\`acoes
 [{"tipo":"criar_tarefa","k":"AAAA-MM-DD","f":"cont|traf|copy|wa|tech|ev","t":"título curto","s":"detalhe","r":"por quê","owner_role":"expert|gestor_trafego|copywriter|operacao|gestor_projetos","depends_on":["id-existente"]},
  {"tipo":"alterar_tarefa","id":"id-existente","k":"AAAA-MM-DD","t":"…","s":"…","r":"…","owner_role":"…"},
- {"tipo":"decisao","campo":"nome|horario|plataforma|livesSemana|lote2|lote3|precoFF|bonusVivo|fechaCarrinho|bsp|palavraChave|paginaVencedora|linkIngresso|dominio","valor":"…"},
+ {"tipo":"decisao","campo":"nome|horario|plataforma|livesSemana|lote2|precoFF|bonusVivo|fechaCarrinho|bsp|palavraChave|paginaVencedora|linkIngresso|dominio","valor":"…"},
  {"tipo":"registro","titulo":"…","texto":"…"}]
 \`\`\`
 Em alterar_tarefa inclua só os campos que mudam. Datas entre ${context?.hoje || "2026-09-28"} e 2026-11-13. Frentes: cont=Conteúdo & Lives (expert), traf=Tráfego, copy=Copy & E-mail, wa=WhatsApp & ManyChat (operacao), tech=Páginas & Ferramentas, ev=Evento & Oferta (gestor_projetos).` : ""}

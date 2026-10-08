@@ -11,7 +11,7 @@ index.html                         # tela de login + painel
 app.js                             # lógica do painel (Supabase)
 assistente.js                      # assistente de IA flutuante (todas as abas; ações com aprovação do admin)
 pesquisa.js                        # aba Pesquisa: importação da base de leads, painéis, dores, temas e IA
-seed.js                            # cronograma padrão (191 tarefas interligadas) e seções
+seed.js                            # cronograma padrão (176 tarefas interligadas) e seções
 styles.css                         # visual (paleta dourado/azul-escuro, Montserrat + Playfair)
 config.js                          # URL e chave anon do Supabase (preencher)
 supabase/schema.sql                # tabelas, regras de acesso, gatilhos, tempo real, e-mails dos admins, leads

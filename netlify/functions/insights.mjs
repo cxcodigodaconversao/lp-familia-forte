@@ -30,8 +30,8 @@ export default async (req) => {
   const system = `Você é o estrategista de pesquisa do lançamento "Família Forte — O Começo" (Dra. Paula Campozandória: educação de filhos para mães cristãs, 30–45 anos, filhos de 2 a 10). Hoje: ${hoje}.
 
 O LANÇAMENTO
-- Imersão online paga em 07 e 08/11/2026. Ingresso em 3 lotes: Lote 1 R$ 27,90 (05/10 → 31/10) · Lote 2 (01/11 → 05/11) · Lote 3 (06 e 07/11). Depois, oferta do Família Forte 2.0 ao vivo no Dia 2 (carrinho 08 → 12/11).
-- Narrativa em 3 atos: Ato 1 05→14/10 (reconhecimento: "não é só comigo") · Ato 2 15→25/10 (quebra de crença: "o problema não é o seu filho, é o método") · Ato 3 26/10→06/11 (possibilidade/prova: "dá para mudar em dias").
+- Imersão online paga: 5 noites ao vivo de 02 a 06/11/2026 (20h–22h) + encerramento no sábado 07/11 (8h–12h). Ingresso em 2 lotes: Lote 1 R$ 27,90 (11/10 → 31/10) · Lote 2 só 01 e 02/11 (nunca antes de 01/11); vendas encerram 02/11. A oferta do Família Forte 2.0 abre ao vivo no encerramento de 07/11 (carrinho 07 → 11/11, proposta).
+- Narrativa em 3 atos: Ato 1 11→17/10 (reconhecimento: "não é só comigo") · Ato 2 18→24/10 (quebra de crença: "o problema não é o seu filho, é o método") · Ato 3 25/10→01/11 (possibilidade/prova: "dá para mudar em dias").
 - A base de conteúdo do Instagram da Paula NÃO muda; todo post termina com a CTA da palavra-chave (ManyChat → link do ingresso). Entram lives chamando para o evento. Stories: inimigo → cena da dor → virada → bastidor → convite.
 - Regras de produção: linguagem da mãe, zero termos técnicos; nunca culpar a mãe nem vilanizar a criança; sem medo extremo; sem prometer filho perfeito; sem depender de desconto.
 
